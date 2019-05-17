@@ -1,0 +1,35 @@
+﻿<Window x:Class="MVVMTemplate.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MVVMTemplate"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="750" Background="Black" ResizeMode="CanMinimize"
+        Icon="pack://application:,,,/Resources/gear_icon1.ico">
+
+    <Window.DataContext>
+        <local:MainWindowViewModel/>
+    </Window.DataContext>
+
+    <Grid>
+        <!-- See App.xaml for button template -->
+        <Button x:Name="open_dialog" Margin="0,140,0,0" Height="40" Width="140"
+                Style="{StaticResource Custom_Button_Style}"
+                BorderBrush="White"
+                Background="CadetBlue"
+                Foreground="White"
+                HorizontalAlignment="Center" VerticalAlignment="Top"
+                TabIndex="0"
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                Command="{Binding Open_Dialog}">
+            <Label VerticalAlignment="Center" HorizontalAlignment="Center"
+                       HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                       Height="26" Margin="0,-4,0,0" Padding="0" Content="Open Dialog" Foreground="White"/>
+            <Button.Resources>
+                <SolidColorBrush x:Key="MouseOverBrush" Color="DeepSkyBlue"/>
+                <SolidColorBrush x:Key="PressedBrush" Color="MidnightBlue"/>
+            </Button.Resources>
+        </Button>
+    </Grid>
+</Window>
