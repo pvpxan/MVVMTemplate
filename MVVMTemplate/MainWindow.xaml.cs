@@ -28,7 +28,7 @@ namespace MVVMTemplate
 
                 Statics.MainWindow = this;
 
-                Loaded += Content_Loaded;
+                Loaded += contentLoaded;
             }
             catch (Exception Ex)
             {
@@ -36,7 +36,7 @@ namespace MVVMTemplate
             }
         }
 
-        private void Content_Loaded(object sender, RoutedEventArgs e)
+        private void contentLoaded(object sender, RoutedEventArgs e)
         {
             // Get the viewmodel from the DataContext
             MainWindowViewModel viewmodel = DataContext as MainWindowViewModel;
@@ -61,7 +61,7 @@ namespace MVVMTemplate
         public MainWindowViewModel()
         {
             Loaded = new RelayCommand(Loaded_Command);
-            Open_Dialog = new RelayCommand(Open_Dialog_Command);
+            OpenDialog = new RelayCommand(OpenDialogCommand);
         }
         // ---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -86,28 +86,28 @@ namespace MVVMTemplate
         }
 
         // ------------------------------------------------------
-        private ICommand _Open_Dialog;
-        public ICommand Open_Dialog
+        private ICommand _OpenDialog;
+        public ICommand OpenDialog
         {
             get
             {
-                return _Open_Dialog;
+                return _OpenDialog;
             }
             set
             {
-                _Open_Dialog = value;
+                _OpenDialog = value;
             }
         }
-        private void Open_Dialog_Command(object parameter)
+        private void OpenDialogCommand(object parameter)
         {
-            Example_One(parameter);
-            Example_Two(parameter);
+            ExampleOne(parameter);
+            ExampleTwo(parameter);
         }
 
         // Usage examples:
         // Windows like dialog:
         // NOTE: See the DialogData class above for more options. The method used below and even direct calling to open a dialog requires a window where the dialog will open.
-        public static void Example_One(object parameter)
+        public static void ExampleOne(object parameter)
         {
             DialogData data = new DialogData()
             {
@@ -123,7 +123,7 @@ namespace MVVMTemplate
         }
 
         // Custom dialog:
-        public static void Example_Two(object parameter)
+        public static void ExampleTwo(object parameter)
         {
             DialogData data = new DialogData()
             {

@@ -15,12 +15,12 @@ namespace MVVMTemplate
     /// </summary>
     public partial class App : Application
     {
-        public void App_Startup(object sender, StartupEventArgs e)
+        public void AppStartup(object sender, StartupEventArgs e)
         {
-            Statics.initialization();
+            Statics.Initialization();
 
-            MainWindow mainwindow = new MainWindow();
-            mainwindow.Show();
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
         }
     }
 
@@ -39,7 +39,7 @@ namespace MVVMTemplate
         public static string INIFilePath = "";
 
         // Method to load start up global vars.
-        public static void initialization()
+        public static void Initialization()
         {
             //LoadDLLs load_dlls = new LoadDLLs();
             //load_dlls.init();

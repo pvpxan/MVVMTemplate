@@ -60,7 +60,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Classes\ConfigManager.cs" />
     <Compile Include="Classes\INI.cs" />
+    <Compile Include="Classes\LogWriter.cs" />
     <Compile Include="Classes\Utility.cs" />
     <Compile Include="Controls\CustomDialog.xaml.cs">
       <DependentUpon>CustomDialog.xaml</DependentUpon>

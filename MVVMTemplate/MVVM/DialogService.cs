@@ -89,15 +89,15 @@ namespace MVVMTemplate
     {
         public static WindowMessageResult OpenDialog(DialogBaseWindowViewModel viewmodel, Window owner)
         {
-            DialogBaseWindow dialog_window = new DialogBaseWindow();
+            DialogBaseWindow dialogWindow = new DialogBaseWindow();
             if (owner != null)
             {
-                dialog_window.Owner = owner;
+                dialogWindow.Owner = owner;
             }
 
-            dialog_window.DataContext = viewmodel;
-            dialog_window.ShowDialog();
-            WindowMessageResult result = (dialog_window.DataContext as DialogBaseWindowViewModel).UserDialogResult;
+            dialogWindow.DataContext = viewmodel;
+            dialogWindow.ShowDialog();
+            WindowMessageResult result = (dialogWindow.DataContext as DialogBaseWindowViewModel).UserDialogResult;
             return result;
         }
     }
