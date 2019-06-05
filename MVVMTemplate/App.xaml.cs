@@ -17,10 +17,53 @@ namespace MVVMTemplate
     {
         public void AppStartup(object sender, StartupEventArgs e)
         {
+            // LoadAssemblies(); // Load embedded resources.
             Statics.Initialization();
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
+        }
+
+        // NECESSARY for loading embedded resources.
+        // ----------------------------------------------------------------------------------------------
+        public static void LoadAssemblies()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
+                string dllName = new AssemblyName(args.Name).Name + ".dll";
+                var assembly = Assembly.GetExecutingAssembly();
+
+                string resourceName = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn.EndsWith(dllName));
+                if (resourceName == null)
+                {
+                    return null; // Not found, maybe another handler will find it
+                }
+
+                System.IO.Stream stream = null;
+                Assembly loadedAssembly = null;
+                try
+                {
+                    stream = assembly.GetManifestResourceStream(resourceName);
+                    byte[] assemblyData = new byte[stream.Length];
+                    stream.Read(assemblyData, 0, assemblyData.Length);
+                    loadedAssembly = Assembly.Load(assemblyData);
+                }
+                catch (Exception Ex)
+                {
+                    loadedAssembly = null;
+                    MessageBox.Show("Error loading embedded assembly resource. Application will now close." + Environment.NewLine + Convert.ToString(Ex));
+                    Application.Current.Shutdown();
+                }
+                finally
+                {
+                    if (stream != null)
+                    {
+                        stream.Dispose();
+                    }
+                }
+
+                return loadedAssembly;
+            };
         }
     }
 
@@ -28,22 +71,15 @@ namespace MVVMTemplate
     public static class Statics
     {
         public static Version CurrentFileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-
         public static Window MainWindow = null;
-
         public static readonly string[] Args = Environment.GetCommandLineArgs();
-
         public static readonly string CurrentUser = Environment.UserName.ToLower();
-
         public static string ProgramPath = "";
         public static string INIFilePath = "";
 
         // Method to load start up global vars.
         public static void Initialization()
         {
-            //LoadDLLs load_dlls = new LoadDLLs();
-            //load_dlls.init();
-
             try
             {
                 if (System.AppDomain.CurrentDomain.BaseDirectory[System.AppDomain.CurrentDomain.BaseDirectory.Length - 1] == '\\')
@@ -55,10 +91,12 @@ namespace MVVMTemplate
                     ProgramPath = Environment.CurrentDirectory;
                 }
             }
-            catch (Exception Ex)
+            catch
             {
-                LogWriter.Exception("Error attempting to find program local path.", Ex);
+                // TODO: Add some sort of default logging.
             }
+
+            LogWriter.SetPath(ProgramPath, CurrentUser, System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
         // Opens Custom Windows style Dialog Window and setting the owner of that window to the passed in paramater. Optinal use since a dialog can be directly opened.
@@ -77,35 +115,4 @@ namespace MVVMTemplate
         }
     }
     // END Statics_Class ----------------------------------------------------------------------------------------------------------------
-
-    // START LoadDLLs_Class -------------------------------------------------------------------------------------------------------------
-    public class LoadDLLs
-    {
-        public void init()
-        {
-            // NECESSARY for loading embedded resources. Cannot be static class.
-            // -----------------------------------------------------------------------------------
-            try
-            {
-                AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-                {
-                    string resourceName = new AssemblyName(args.Name).Name + ".dll";
-                    string resource = Array.Find(this.GetType().Assembly.GetManifestResourceNames(), element => element.EndsWith(resourceName));
-
-                    using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource))
-                    {
-                        Byte[] assemblyData = new Byte[stream.Length];
-                        stream.Read(assemblyData, 0, assemblyData.Length);
-                        return Assembly.Load(assemblyData);
-                    }
-                };
-            }
-            catch (Exception Ex)
-            {
-                LogWriter.Exception("Error loading embedded assembly resource. Application is about to crash.", Ex, true);
-            }
-            // -----------------------------------------------------------------------------------
-        }
-    }
-    // END LoadDLLs_Class ---------------------------------------------------------------------------------------------------------------
 }
