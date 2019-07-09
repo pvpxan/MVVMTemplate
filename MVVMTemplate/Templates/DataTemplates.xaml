@@ -1,0 +1,23 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:MVVMTemplate">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Templates/ButtonExtended.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Templates/CheckBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Templates/FlatComboBox.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Templates/GroupBoxImproved.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Templates/ListViewExtended.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Templates/ScrollBarExtended.xaml" />
+
+        <!-- START User defined custom dialog DataTypes -->
+        <ResourceDictionary>
+            <DataTemplate DataType="{x:Type local:WindowsMessageViewModel}">
+                <local:WindowsMessage/>
+            </DataTemplate>
+        </ResourceDictionary>
+        <!-- END User defined custom dialog DataTypes -->
+
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

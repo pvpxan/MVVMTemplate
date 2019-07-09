@@ -62,7 +62,8 @@
     </ApplicationDefinition>
     <Compile Include="Classes\ConfigManager.cs" />
     <Compile Include="Classes\INI.cs" />
-    <Compile Include="Classes\LogWriter.cs" />
+    <Compile Include="Classes\LogWriterConsole.cs" />
+    <Compile Include="Classes\LogWriterWPF.cs" />
     <Compile Include="Classes\Utility.cs" />
     <Compile Include="Controls\CustomDialog.xaml.cs">
       <DependentUpon>CustomDialog.xaml</DependentUpon>
@@ -97,10 +98,40 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Templates\ButtonExtended.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Templates\CheckBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Templates\DataTemplates.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Templates\FlatComboBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Templates\GroupBoxImproved.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Templates\ListViewExtended.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Templates\ScrollBarExtended.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MVVM\DataMessaging.cs" />
     <Compile Include="MVVM\DialogService.cs" />
+    <Compile Include="MVVM\Extensions.cs" />
+    <Compile Include="MVVM\MessageBoxEnhanced.cs" />
     <Compile Include="MVVM\RelayCommand.cs" />
     <Compile Include="MVVM\ViewModelBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -141,5 +172,6 @@
   <ItemGroup>
     <Resource Include="Resources\sun_icon2.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

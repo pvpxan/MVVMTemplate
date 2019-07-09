@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace MVVMTemplate
 {
@@ -25,40 +26,19 @@ namespace MVVMTemplate
     /// </summary>
     public partial class WindowsMessage : UserControl
     {
-        private Window window = null;
-
         public WindowsMessage()
         {
-            MainWindow main_window = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
-
             try
             {
                 InitializeComponent();
-
-                Loaded += Content_Loaded;
             }
-            catch (Exception Ex)
+            catch //(Exception Ex)
             {
-                MessageBox.Show(main_window, "Window load error: " + Environment.NewLine + Convert.ToString(Ex), "Error...", MessageBoxButton.OK, MessageBoxImage.Error);
+                // TODO (DB): Create some sort of error log in a default windows directory.
             }
         }
 
-        private void Content_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Gets the Window object reference encapsulating this control.
-            window = Window.GetWindow(this);
-
-            // Get the viewmodel from the DataContext
-            WindowsMessageViewModel viewmodel = DataContext as WindowsMessageViewModel;
-
-            // Call command from viewmodel     
-            if ((viewmodel != null) && (viewmodel.Loaded.CanExecute(window)))
-            {
-                viewmodel.Loaded.Execute(window);
-            }
-        }
-
-        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        private void hyperlinkRequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             using (Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri)))
             {
@@ -71,503 +51,622 @@ namespace MVVMTemplate
     {
         // ViewModel Only Vars
         // ---------------------------------------------------------------------------------------------------------------------------------------------
-        private Window window = null;
+        // TODO (DB): There might be some functionality added that requires this section.
+        // ---------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Bound Variables
+        // ---------------------------------------------------------------------------------------------------------------------------------------------
+        // -----------------------------------------------------
+        private System.Windows.Media.Brush _Background = System.Windows.Media.Brushes.White;
+        public System.Windows.Media.Brush Background
+        {
+            get
+            {
+                return _Background;
+            }
+            set
+            {
+                _Background = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("Background"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private BitmapSource _MessageIcon;
+        public BitmapSource MessageIcon
+        {
+            get
+            {
+                return _MessageIcon;
+            }
+            set
+            {
+                _MessageIcon = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("MessageIcon"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private System.Windows.Media.Brush _ContentHeaderColor = System.Windows.Media.Brushes.DarkBlue;
+        public System.Windows.Media.Brush ContentHeaderColor
+        {
+            get
+            {
+                return _ContentHeaderColor;
+            }
+            set
+            {
+                _ContentHeaderColor = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ContentHeaderColor"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private string _ContentHeader = "";
+        public string ContentHeader
+        {
+            get
+            {
+                return _ContentHeader;
+            }
+            set
+            {
+                _ContentHeader = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ContentHeader"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private Visibility _ContentBodyVisibility = System.Windows.Visibility.Collapsed;
+        public Visibility ContentBodyVisibility
+        {
+            get
+            {
+                return _ContentBodyVisibility;
+            }
+            set
+            {
+                _ContentBodyVisibility = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ContentBodyVisibility"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private System.Windows.Media.Brush _ContentBodyColor = System.Windows.Media.Brushes.Black;
+        public System.Windows.Media.Brush ContentBodyColor
+        {
+            get
+            {
+                return _ContentBodyColor;
+            }
+            set
+            {
+                _ContentBodyColor = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ContentBodyColor"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private string _ContentBody = "";
+        public string ContentBody
+        {
+            get
+            {
+                return _ContentBody;
+            }
+            set
+            {
+                _ContentBody = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ContentBody"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private bool _HyperLinkIsEnabled = false;
+        public bool HyperLinkIsEnabled
+        {
+            get
+            {
+                return _HyperLinkIsEnabled;
+            }
+            set
+            {
+                _HyperLinkIsEnabled = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("HyperLinkIsEnabled"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private Visibility _HyperLinkVisibility = System.Windows.Visibility.Collapsed;
+        public Visibility HyperLinkVisibility
+        {
+            get
+            {
+                return _HyperLinkVisibility;
+            }
+            set
+            {
+                _HyperLinkVisibility = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("HyperLinkVisibility"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private System.Windows.Media.Brush _HyperLinkColor = System.Windows.Media.Brushes.Blue;
+        public System.Windows.Media.Brush HyperLinkColor
+        {
+            get
+            {
+                return _HyperLinkColor;
+            }
+            set
+            {
+                _HyperLinkColor = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("HyperLinkColor"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private System.Windows.Media.Brush _HyperLinkMouseOverColor = System.Windows.Media.Brushes.Red;
+        public System.Windows.Media.Brush HyperLinkMouseOverColor
+        {
+            get
+            {
+                return _HyperLinkMouseOverColor;
+            }
+            set
+            {
+                _HyperLinkMouseOverColor = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("HyperLinkMouseOverColor"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private System.Windows.Media.Brush _HyperLinkMouseDisabledColor = System.Windows.Media.Brushes.Gray;
+        public System.Windows.Media.Brush HyperLinkMouseDisabledColor
+        {
+            get
+            {
+                return _HyperLinkMouseDisabledColor;
+            }
+            set
+            {
+                _HyperLinkMouseDisabledColor = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("HyperLinkMouseDisabledColor"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private string _HyperLinkUri = "";
+        public string HyperLinkUri
+        {
+            get
+            {
+                return _HyperLinkUri;
+            }
+            set
+            {
+                _HyperLinkUri = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("HyperLinkUri"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private string _HyperLinkText = "";
+        public string HyperLinkText
+        {
+            get
+            {
+                return _HyperLinkText;
+            }
+            set
+            {
+                _HyperLinkText = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("HyperLinkText"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private string _LeftContent = "";
+        public string LeftContent
+        {
+            get
+            {
+                return _LeftContent;
+            }
+            set
+            {
+                _LeftContent = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("LeftContent"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private bool _LeftIsEnabled = false;
+        public bool LeftIsEnabled
+        {
+            get
+            {
+                return _LeftIsEnabled;
+            }
+            set
+            {
+                _LeftIsEnabled = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("LeftIsEnabled"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private Visibility _LeftVisibility = System.Windows.Visibility.Hidden;
+        public Visibility LeftVisibility
+        {
+            get
+            {
+                return _LeftVisibility;
+            }
+            set
+            {
+                _LeftVisibility = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("LeftVisibility"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private string _CenterContent = "";
+        public string CenterContent
+        {
+            get
+            {
+                return _CenterContent;
+            }
+            set
+            {
+                _CenterContent = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CenterContent"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private bool _CenterIsEnabled = false;
+        public bool CenterIsEnabled
+        {
+            get
+            {
+                return _CenterIsEnabled;
+            }
+            set
+            {
+                _CenterIsEnabled = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CenterIsEnabled"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private Visibility _CenterVisibility = System.Windows.Visibility.Hidden;
+        public Visibility CenterVisibility
+        {
+            get
+            {
+                return _CenterVisibility;
+            }
+            set
+            {
+                _CenterVisibility = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CenterVisibility"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private string _RightContent = "";
+        public string RightContent
+        {
+            get
+            {
+                return _RightContent;
+            }
+            set
+            {
+                _RightContent = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("RightContent"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private bool _RightIsEnabled = false;
+        public bool RightIsEnabled
+        {
+            get
+            {
+                return _RightIsEnabled;
+            }
+            set
+            {
+                _RightIsEnabled = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("RightIsEnabled"));
+            }
+        }
+
+        // -----------------------------------------------------
+        private Visibility _RightVisibility = System.Windows.Visibility.Hidden;
+        public Visibility RightVisibility
+        {
+            get
+            {
+                return _RightVisibility;
+            }
+            set
+            {
+                _RightVisibility = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("RightVisibility"));
+            }
+        }
+
+        // Bound Commands
+        // ---------------------------------------------------------------------------------------------------------------------------------------------
+        // -----------------------------------------------------
+        public ICommand Loaded { get; private set; }
+        private void loadedCommand(object parameter)
+        {
+            //TODO (DB): Possible add some loaded events.
+        }
+
+        // -----------------------------------------------------
+        public ICommand Rendered { get; private set; }
+        private void renderedCommand(object parameter)
+        {
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { })).Wait();
+        }
+
+        // -----------------------------------------------------
+        public ICommand LeftButton { get; private set; }
+        public ICommand CenterButton { get; private set; }
+        public ICommand RightButton { get; private set; }
+
+        // Special Command Handling
+        // ------------------------------------------------------
+        private void okCommand(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Ok);
+        }
+
+        private void cancelCommand(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Cancel);
+        }
+
+        private void yesCommand(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Yes);
+        }
+
+        private void noCommand(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.No);
+        }
+
+        private void exitCommand(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Exit);
+        }
+
+        private void continueCommand(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Continue);
+        }
+
+        private void acceptCommand(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Accept);
+        }
+
+        private void declineCommand(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Decline);
+        }
+
+        private void custom1Command(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Custom1);
+        }
+
+        private void custom2Command(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Custom2);
+        }
+
+        private void custom3Command(object parameter)
+        {
+            CloseDialogWithResult(parameter as Window, WindowMessageResult.Custom3);
+        }
         // ---------------------------------------------------------------------------------------------------------------------------------------------
 
         // Constructor
         // ---------------------------------------------------------------------------------------------------------------------------------------------
         public WindowsMessageViewModel(DialogData data) : base(data)
         {
-            MessageImage = GetIcon(data.Icon);
-            Caption = data.Caption;
-            Content = data.Content;
+            Background = data.Background;
+            MessageIcon = GetIcon(data.MessageIcon);
+            ContentHeader = data.ContentHeader;
+
+            if (data.ContentBody.Length > 0)
+            {
+                ContentBodyVisibility = Visibility.Visible;
+                ContentBody = data.ContentBody;
+            }
 
             if (data.HyperLinkUri.Length > 0)
             {
-                HyperLink_IsEnabled = true;
-                HyperLink_Visibility = Visibility.Visible;
+                HyperLinkIsEnabled = true;
+                HyperLinkVisibility = Visibility.Visible;
 
-                HyperLink_Uri = data.HyperLinkUri;
+                HyperLinkUri = data.HyperLinkUri;
 
                 if (data.HyperLinkText.Length > 0)
                 {
-                    HyperLink_Text = data.HyperLinkText;
+                    HyperLinkText = data.HyperLinkText;
                 }
                 else
                 {
-                    HyperLink_Text = data.HyperLinkUri;
+                    HyperLinkText = data.HyperLinkUri;
                 }
             }
 
-            Loaded = new RelayCommand(Loaded_Command);
+            Loaded = new RelayCommand(loadedCommand);
+            Rendered = new RelayCommand(renderedCommand);
 
-            switch (data.Buttons)
+            // Subscribes to the Rendered Event of the DialogBaseWindow that sets this control as its datacontext.
+            WindowRenderedEvent.OnContentRendered += delegate { renderedCommand(DialogWindow); };
+
+            switch (data.MessageButtons)
             {
-                case DialogButtons.Default:
+                case WindowMessageButtons.Default:
 
                     break;
 
-                case DialogButtons.Ok:
+                case WindowMessageButtons.Ok:
 
-                    Center_Content = "Ok";
-                    Center_IsEnabled = true;
-                    Center_Visibility = Visibility.Visible;
+                    CenterContent = "Ok";
+                    CenterIsEnabled = true;
+                    CenterVisibility = Visibility.Visible;
 
-                    Center_Button = new RelayCommand(Ok_Command);
-
-                    break;
-
-                case DialogButtons.OkCancel:
-
-                    Left_Content = "Ok";
-                    Left_IsEnabled = true;
-                    Left_Visibility = Visibility.Visible;
-
-                    Left_Button = new RelayCommand(Ok_Command);
-
-                    Right_Content = "Cancel";
-                    Right_IsEnabled = true;
-                    Right_Visibility = Visibility.Visible;
-
-                    Right_Button = new RelayCommand(Cancel_Command);
+                    CenterButton = new RelayCommand(okCommand);
 
                     break;
 
-                case DialogButtons.YesNo:
+                case WindowMessageButtons.OkCancel:
 
-                    Left_Content = "Yes";
-                    Left_IsEnabled = true;
-                    Left_Visibility = Visibility.Visible;
+                    LeftContent = "Ok";
+                    LeftIsEnabled = true;
+                    LeftVisibility = Visibility.Visible;
 
-                    Left_Button = new RelayCommand(Yes_Command);
+                    LeftButton = new RelayCommand(okCommand);
 
-                    Right_Content = "No";
-                    Right_IsEnabled = true;
-                    Right_Visibility = Visibility.Visible;
+                    RightContent = "Cancel";
+                    RightIsEnabled = true;
+                    RightVisibility = Visibility.Visible;
 
-                    Right_Button = new RelayCommand(No_Command);
-
-                    break;
-
-                case DialogButtons.YesNoCancel:
-
-                    Left_Content = "Yes";
-                    Left_IsEnabled = true;
-                    Left_Visibility = Visibility.Visible;
-
-                    Left_Button = new RelayCommand(Yes_Command);
-
-                    Center_Content = "No";
-                    Center_IsEnabled = true;
-                    Center_Visibility = Visibility.Visible;
-
-                    Center_Button = new RelayCommand(No_Command);
-
-                    Right_Content = "Cancel";
-                    Right_IsEnabled = true;
-                    Right_Visibility = Visibility.Visible;
-
-                    Right_Button = new RelayCommand(Cancel_Command);
+                    RightButton = new RelayCommand(cancelCommand);
 
                     break;
 
-                case DialogButtons.Exit:
+                case WindowMessageButtons.YesNo:
 
-                    Center_Content = "Exit";
-                    Center_IsEnabled = true;
-                    Center_Visibility = Visibility.Visible;
+                    LeftContent = "Yes";
+                    LeftIsEnabled = true;
+                    LeftVisibility = Visibility.Visible;
 
-                    Center_Button = new RelayCommand(Exit_Command);
+                    LeftButton = new RelayCommand(yesCommand);
 
-                    break;
+                    RightContent = "No";
+                    RightIsEnabled = true;
+                    RightVisibility = Visibility.Visible;
 
-                case DialogButtons.ContinueCancel:
-
-                    Left_Content = "Continue";
-                    Left_IsEnabled = true;
-                    Left_Visibility = Visibility.Visible;
-
-                    Left_Button = new RelayCommand(Continue_Command);
-
-                    Right_Content = "Cancel";
-                    Right_IsEnabled = true;
-                    Right_Visibility = Visibility.Visible;
-
-                    Right_Button = new RelayCommand(Cancel_Command);
+                    RightButton = new RelayCommand(noCommand);
 
                     break;
 
-                case DialogButtons.AcceptDecline:
+                case WindowMessageButtons.YesNoCancel:
 
-                    Left_Content = "Accept";
-                    Left_IsEnabled = true;
-                    Left_Visibility = Visibility.Visible;
+                    LeftContent = "Yes";
+                    LeftIsEnabled = true;
+                    LeftVisibility = Visibility.Visible;
 
-                    Left_Button = new RelayCommand(Accept_Command);
+                    LeftButton = new RelayCommand(yesCommand);
 
-                    Right_Content = "Decline";
-                    Right_IsEnabled = true;
-                    Right_Visibility = Visibility.Visible;
+                    CenterContent = "No";
+                    CenterIsEnabled = true;
+                    CenterVisibility = Visibility.Visible;
 
-                    Right_Button = new RelayCommand(Decline_Command);
+                    CenterButton = new RelayCommand(noCommand);
+
+                    RightContent = "Cancel";
+                    RightIsEnabled = true;
+                    RightVisibility = Visibility.Visible;
+
+                    RightButton = new RelayCommand(cancelCommand);
+
+                    break;
+
+                case WindowMessageButtons.Exit:
+
+                    CenterContent = "Exit";
+                    CenterIsEnabled = true;
+                    CenterVisibility = Visibility.Visible;
+
+                    CenterButton = new RelayCommand(exitCommand);
+
+                    break;
+
+                case WindowMessageButtons.ContinueCancel:
+
+                    LeftContent = "Continue";
+                    LeftIsEnabled = true;
+                    LeftVisibility = Visibility.Visible;
+
+                    LeftButton = new RelayCommand(continueCommand);
+
+                    RightContent = "Cancel";
+                    RightIsEnabled = true;
+                    RightVisibility = Visibility.Visible;
+
+                    RightButton = new RelayCommand(cancelCommand);
+
+                    break;
+
+                case WindowMessageButtons.AcceptDecline:
+
+                    LeftContent = "Accept";
+                    LeftIsEnabled = true;
+                    LeftVisibility = Visibility.Visible;
+
+                    LeftButton = new RelayCommand(acceptCommand);
+
+                    RightContent = "Decline";
+                    RightIsEnabled = true;
+                    RightVisibility = Visibility.Visible;
+
+                    RightButton = new RelayCommand(declineCommand);
+
+                    break;
+
+                case WindowMessageButtons.Custom:
+
+                    if (data.CustomButtoms.Custom1.Length > 0)
+                    {
+                        LeftContent = data.CustomButtoms.Custom1;
+                        LeftIsEnabled = true;
+                        LeftVisibility = Visibility.Visible;
+
+                        LeftButton = new RelayCommand(custom1Command);
+                    }
+
+                    if (data.CustomButtoms.Custom2.Length > 0)
+                    {
+                        CenterContent = data.CustomButtoms.Custom2;
+                        CenterIsEnabled = true;
+                        CenterVisibility = Visibility.Visible;
+
+                        CenterButton = new RelayCommand(custom2Command);
+                    }
+
+                    if (data.CustomButtoms.Custom3.Length > 0)
+                    {
+                        RightContent = data.CustomButtoms.Custom3;
+                        RightIsEnabled = true;
+                        RightVisibility = Visibility.Visible;
+
+                        RightButton = new RelayCommand(custom3Command);
+                    }
 
                     break;
             }
         }
 
-        private BitmapSource GetIcon(DialogIcon icontype)
+        private BitmapSource GetIcon(WindowMessageIcon icontype)
         {
             Icon icon = (Icon)typeof(SystemIcons).GetProperty(Convert.ToString(icontype), BindingFlags.Public | BindingFlags.Static).GetValue(null, null);
 
             return Imaging.CreateBitmapSourceFromHIcon(icon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-        }
-        // ---------------------------------------------------------------------------------------------------------------------------------------------
-
-        // Bound Variables
-        // ---------------------------------------------------------------------------------------------------------------------------------------------
-        // -----------------------------------------------------
-        private BitmapSource _MessageImage;
-        public BitmapSource MessageImage
-        {
-            get
-            {
-                return _MessageImage;
-            }
-            set
-            {
-                _MessageImage = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("MessageImage"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private string _Caption = "";
-        public string Caption
-        {
-            get
-            {
-                return _Caption;
-            }
-            set
-            {
-                _Caption = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Caption"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private string _Content = "";
-        public string Content
-        {
-            get
-            {
-                return _Content;
-            }
-            set
-            {
-                _Content = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Content"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private string _HyperLink_Uri = "";
-        public string HyperLink_Uri
-        {
-            get
-            {
-                return _HyperLink_Uri;
-            }
-            set
-            {
-                _HyperLink_Uri = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("HyperLink_Uri"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private string _HyperLink_Text = "";
-        public string HyperLink_Text
-        {
-            get
-            {
-                return _HyperLink_Text;
-            }
-            set
-            {
-                _HyperLink_Text = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("HyperLink_Text"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private string _Left_Content = "";
-        public string Left_Content
-        {
-            get
-            {
-                return _Left_Content;
-            }
-            set
-            {
-                _Left_Content = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Left_Content"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private bool _HyperLink_IsEnabled = false;
-        public bool HyperLink_IsEnabled
-        {
-            get
-            {
-                return _HyperLink_IsEnabled;
-            }
-            set
-            {
-                _HyperLink_IsEnabled = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("HyperLink_IsEnabled"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private Visibility _HyperLink_Visibility = System.Windows.Visibility.Collapsed;
-        public Visibility HyperLink_Visibility
-        {
-            get
-            {
-                return _HyperLink_Visibility;
-            }
-            set
-            {
-                _HyperLink_Visibility = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("HyperLink_Visibility"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private bool _Left_IsEnabled = false;
-        public bool Left_IsEnabled
-        {
-            get
-            {
-                return _Left_IsEnabled;
-            }
-            set
-            {
-                _Left_IsEnabled = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Left_IsEnabled"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private Visibility _Left_Visibility = System.Windows.Visibility.Hidden;
-        public Visibility Left_Visibility
-        {
-            get
-            {
-                return _Left_Visibility;
-            }
-            set
-            {
-                _Left_Visibility = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Left_Visibility"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private string _Center_Content = "";
-        public string Center_Content
-        {
-            get
-            {
-                return _Center_Content;
-            }
-            set
-            {
-                _Center_Content = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Center_Content"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private bool _Center_IsEnabled = false;
-        public bool Center_IsEnabled
-        {
-            get
-            {
-                return _Center_IsEnabled;
-            }
-            set
-            {
-                _Center_IsEnabled = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Center_IsEnabled"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private Visibility _Center_Visibility = System.Windows.Visibility.Hidden;
-        public Visibility Center_Visibility
-        {
-            get
-            {
-                return _Center_Visibility;
-            }
-            set
-            {
-                _Center_Visibility = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Center_Visibility"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private string _Right_Content = "";
-        public string Right_Content
-        {
-            get
-            {
-                return _Right_Content;
-            }
-            set
-            {
-                _Right_Content = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Right_Content"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private bool _Right_IsEnabled = false;
-        public bool Right_IsEnabled
-        {
-            get
-            {
-                return _Right_IsEnabled;
-            }
-            set
-            {
-                _Right_IsEnabled = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Right_IsEnabled"));
-            }
-        }
-
-        // -----------------------------------------------------
-        private Visibility _Right_Visibility = System.Windows.Visibility.Hidden;
-        public Visibility Right_Visibility
-        {
-            get
-            {
-                return _Right_Visibility;
-            }
-            set
-            {
-                _Right_Visibility = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Right_Visibility"));
-            }
-        }
-        // ---------------------------------------------------------------------------------------------------------------------------------------------
-
-        // Bound Commands
-        // ---------------------------------------------------------------------------------------------------------------------------------------------
-        // ------------------------------------------------------
-        private ICommand _Loaded;
-        public ICommand Loaded
-        {
-            get
-            {
-                return _Loaded;
-            }
-            set
-            {
-                _Loaded = value;
-            }
-        }
-        private void Loaded_Command(object parameter)
-        {
-            window = parameter as Window;
-        }
-
-        // ------------------------------------------------------
-        private ICommand _Left_Button;
-        public ICommand Left_Button
-        {
-            get
-            {
-                return _Left_Button;
-            }
-            set
-            {
-                _Left_Button = value;
-            }
-        }
-
-        // ------------------------------------------------------
-        private ICommand _Center_Button;
-        public ICommand Center_Button
-        {
-            get
-            {
-                return _Center_Button;
-            }
-            set
-            {
-                _Center_Button = value;
-            }
-        }
-
-        // ------------------------------------------------------
-        private ICommand _Right_Button;
-        public ICommand Right_Button
-        {
-            get
-            {
-                return _Right_Button;
-            }
-            set
-            {
-                _Right_Button = value;
-            }
-        }
-
-        // Special Command Handling
-        // ------------------------------------------------------
-        private void Ok_Command(object parameter)
-        {
-            CloseDialogWithResult(parameter as Window, WindowMessageResult.Ok);
-        }
-
-        private void Cancel_Command(object parameter)
-        {
-            CloseDialogWithResult(parameter as Window, WindowMessageResult.Cancel);
-        }
-
-        private void Yes_Command(object parameter)
-        {
-            CloseDialogWithResult(parameter as Window, WindowMessageResult.Yes);
-        }
-
-        private void No_Command(object parameter)
-        {
-            CloseDialogWithResult(parameter as Window, WindowMessageResult.No);
-        }
-
-        private void Exit_Command(object parameter)
-        {
-            CloseDialogWithResult(parameter as Window, WindowMessageResult.Exit);
-        }
-
-        private void Continue_Command(object parameter)
-        {
-            CloseDialogWithResult(parameter as Window, WindowMessageResult.Continue);
-        }
-
-        private void Accept_Command(object parameter)
-        {
-            CloseDialogWithResult(parameter as Window, WindowMessageResult.Accept);
-        }
-
-        private void Decline_Command(object parameter)
-        {
-            CloseDialogWithResult(parameter as Window, WindowMessageResult.Decline);
         }
         // ---------------------------------------------------------------------------------------------------------------------------------------------
     }

@@ -25,7 +25,7 @@ namespace MVVMTemplate
         Custom3,
     }
 
-    public enum DialogButtons
+    public enum WindowMessageButtons
     {
         Default,
         Ok,
@@ -38,7 +38,7 @@ namespace MVVMTemplate
         Custom,
     }
 
-    public enum DialogIcon
+    public enum WindowMessageIcon
     {
         Application,
         Asterisk,
@@ -52,52 +52,88 @@ namespace MVVMTemplate
         WinLogo
     }
 
-    public class CustomDialogButtons
+    public class WindowMessageColorSet
+    {
+        public Brush Background = Brushes.White;
+
+        public Brush ContentHeaderColor = Brushes.DarkBlue;
+        public Brush ContentBodyColor = Brushes.Black;
+
+        public Brush HyperLinkColor = Brushes.Blue;
+        public Brush HyperLinkMouseOverColor = Brushes.Red;
+        public Brush HyperLinkMouseDisabledColor = Brushes.Gray;
+    }
+
+    public class CustomWindowsMessageButtons
     {
         public string Custom1 = "";
         public string Custom2 = "";
         public string Custom3 = "";
     }
 
+    public class ControlContentRendered
+    {
+        public void ContentRendered()
+        {
+            if (OnContentRendered != null)
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    OnContentRendered();
+                });
+            }
+        }
+
+        public Action OnContentRendered;
+    }
+
     public class DialogData
     {
-        public string Title = "";
+        public Window ParentWindow = null;
+
+        public string WindowTitle = "";
         public Brush Background = Brushes.White;
         public bool Topmost = true;
 
         public WindowStyle DialogWindowStyle = WindowStyle.ToolWindow;
         public string WindowIconURI = "";
 
-        public bool RequireResult = false; // Tells the dialog if the X in the corner can be used or not to close.
-        public bool CancelAsync = false; // Janky: When running async operations on the dialog, you can use this bool as a way to communicate to threads that the window is closing.
+        public bool RequireResult = false;
+        public bool CancelAsync = false;
 
-        public string Content = "";
-        public string Caption = "";
+        public Brush ContentHeaderColor = Brushes.DarkBlue;
+        public string ContentHeader = "";
 
+        public Brush ContentBodyColor = Brushes.Black;
+        public string ContentBody = "";
+
+        public Brush HyperLinkColor = Brushes.Blue;
+        public Brush HyperLinkMouseOverColor = Brushes.Red;
+        public Brush HyperLinkMouseDisabledColor = Brushes.Gray;
         public string HyperLinkText = "";
         public string HyperLinkUri = "";
 
-        public DialogIcon Icon = DialogIcon.WinLogo;
+        public WindowMessageIcon MessageIcon = WindowMessageIcon.Information;
+        public WindowMessageButtons MessageButtons = WindowMessageButtons.Ok;
+        public CustomWindowsMessageButtons CustomButtoms = new CustomWindowsMessageButtons();
 
-        public DialogButtons Buttons = DialogButtons.Default;
-        public CustomDialogButtons CustomButtoms = new CustomDialogButtons();
-
-        // Program specific options can also be added.
+        // Program Specific Options
+        public object CustomData;
     }
 
     public static class DialogService
     {
-        public static WindowMessageResult OpenDialog(DialogBaseWindowViewModel viewmodel, Window owner)
+        public static WindowMessageResult OpenDialog(DialogBaseWindowViewModel viewmodel, Window parentWindow)
         {
-            DialogBaseWindow dialogWindow = new DialogBaseWindow();
-            if (owner != null)
+            DialogBaseWindow dialogBaseWindow = new DialogBaseWindow();
+            if (parentWindow != null)
             {
-                dialogWindow.Owner = owner;
+                dialogBaseWindow.Owner = parentWindow;
             }
 
-            dialogWindow.DataContext = viewmodel;
-            dialogWindow.ShowDialog();
-            WindowMessageResult result = (dialogWindow.DataContext as DialogBaseWindowViewModel).UserDialogResult;
+            dialogBaseWindow.DataContext = viewmodel;
+            dialogBaseWindow.ShowDialog();
+            WindowMessageResult result = (dialogBaseWindow.DataContext as DialogBaseWindowViewModel).UserDialogResult;
             return result;
         }
     }

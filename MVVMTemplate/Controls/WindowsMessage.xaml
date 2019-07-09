@@ -5,56 +5,80 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MVVMTemplate"
              mc:Ignorable="d" 
-             d:DesignHeight="165" d:DesignWidth="585" Height="Auto" Width="585">
+             d:DesignHeight="165" d:DesignWidth="585" Height="Auto" Width="585" Background="{Binding Background}">
 
-    <!-- If creating a new custom dialog control, add something like below to App.xaml
+    <!-- Referenced in DataTemplate.xaml inside this library:
     
-        <DataTemplate DataType="{x:Type local:WindowsMessageViewModel}">
-            <local:WindowsMessage></local:WindowsMessage>
-        </DataTemplate>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:MVVM">
 
-    -->
+    <DataTemplate DataType="{x:Type local:WindowsMessageViewModel}">
+        <local:WindowsMessage/>
+    </DataTemplate>
+
+</ResourceDictionary>
+
+-->
 
     <StackPanel>
         <Grid>
-            <Image Source="{Binding MessageImage}" Stretch="None" HorizontalAlignment="Left" Height="52" Margin="6,10,0,0" VerticalAlignment="Top" Width="55"/>
+            <Image Source="{Binding MessageIcon}" Stretch="None" HorizontalAlignment="Left" Height="52" Margin="6,10,0,0" VerticalAlignment="Top" Width="55"/>
 
             <StackPanel Margin="70,10,10,0">
-                <TextBlock Text="{Binding Caption}" FontFamily="Segoe UI" FontSize="20" Foreground="DarkBlue" TextWrapping="Wrap"/>
-                <TextBlock Margin="0,10,0,0" Text="{Binding Content}" FontFamily="Segoe UI" FontSize="16" TextWrapping="Wrap"/>
-                <TextBlock Margin="0,15,0,0"  FontFamily="Segoe UI" FontSize="16" TextWrapping="Wrap"
-                           Visibility="{Binding HyperLink_Visibility}" IsEnabled="{Binding HyperLink_IsEnabled}">
-                <Hyperlink NavigateUri="{Binding HyperLink_Uri}" RequestNavigate="Hyperlink_RequestNavigate">
-                    <TextBlock Text="{Binding HyperLink_Text}"/>
-                </Hyperlink>
-            </TextBlock>
+                <TextBlock Text="{Binding ContentHeader}" FontFamily="Segoe UI" FontSize="20" Foreground="{Binding ContentHeaderColor}" TextWrapping="Wrap"/>
+                <TextBlock Margin="0,10,0,0" Text="{Binding ContentBody}" FontFamily="Segoe UI" FontSize="16" Foreground="{Binding ContentBodyColor}" TextWrapping="Wrap"
+                           Visibility="{Binding ContentBodyVisibility}"/>
+                <TextBlock Margin="0,15,0,0" FontFamily="Segoe UI" FontSize="16" TextWrapping="Wrap"
+                           Visibility="{Binding HyperLinkVisibility}" IsEnabled="{Binding HyperLinkIsEnabled}">
+                    <TextBlock.Resources>
+                        <Style x:Key="{x:Type Hyperlink}" TargetType="{x:Type Hyperlink}">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter Property="Foreground" Value="{Binding HyperLinkMouseOverColor}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Foreground" Value="{Binding HyperLinkMouseDisabledColor}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="true">
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Trigger>
+                            </Style.Triggers>
+                            <Setter Property="Foreground" Value="{Binding HyperLinkColor}" />
+                            <Setter Property="TextDecorations" Value="Underline" />
+                        </Style>
+                    </TextBlock.Resources>
+                    <Hyperlink NavigateUri="{Binding HyperLinkUri}" RequestNavigate="hyperlinkRequestNavigate">
+                        <TextBlock Text="{Binding HyperLinkText}"/>
+                    </Hyperlink>
+                </TextBlock>
             </StackPanel>
         </Grid>
 
         <Grid Height="60">
-            <Button x:Name="left_button" Margin="10,0,0,15" Width="85" Height="30" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"
-                HorizontalAlignment="Left" VerticalAlignment="Bottom" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0"
-                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                Command="{Binding Left_Button}"
-                Visibility="{Binding Left_Visibility}"
-                IsEnabled="{Binding Left_IsEnabled}"
-                Content="{Binding Left_Content}"/>
+            <Button x:Name="leftButton" Margin="10,0,0,15" Width="85" Height="30" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"
+                    HorizontalAlignment="Left" VerticalAlignment="Bottom" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Command="{Binding LeftButton}"
+                    Visibility="{Binding LeftVisibility}"
+                    IsEnabled="{Binding LeftIsEnabled}"
+                    Content="{Binding LeftContent}"/>
 
-            <Button x:Name="center_button" Margin="0,0,0,15" Width="85" Height="30" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"
-                HorizontalAlignment="Center" VerticalAlignment="Bottom" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0"
-                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                Command="{Binding Center_Button}"
-                Visibility="{Binding Center_Visibility}"
-                IsEnabled="{Binding Center_IsEnabled}"
-                Content="{Binding Center_Content}"/>
+            <Button x:Name="centerButton" Margin="0,0,0,15" Width="85" Height="30" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"
+                    HorizontalAlignment="Center" VerticalAlignment="Bottom" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Command="{Binding CenterButton}"
+                    Visibility="{Binding CenterVisibility}"
+                    IsEnabled="{Binding CenterIsEnabled}"
+                    Content="{Binding CenterContent}"/>
 
-            <Button x:Name="right_button" Margin="0,0,10,15" Width="85" Height="30" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0"
-                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                Command="{Binding Right_Button}"
-                Visibility="{Binding Right_Visibility}"
-                IsEnabled="{Binding Right_IsEnabled}"
-                Content="{Binding Right_Content}"/>
+            <Button x:Name="rightButton" Margin="0,0,10,15" Width="85" Height="30" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Command="{Binding RightButton}"
+                    Visibility="{Binding RightVisibility}"
+                    IsEnabled="{Binding RightIsEnabled}"
+                    Content="{Binding RightContent}"/>
         </Grid>
     </StackPanel>
 </UserControl>

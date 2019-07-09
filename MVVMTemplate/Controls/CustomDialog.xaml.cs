@@ -81,12 +81,13 @@ namespace MVVMTemplate
         // ---------------------------------------------------------------------------------------------------------------------------------------------
         public CustomDialogViewModel(DialogData data) : base(data)
         {
-            DataMessaging.OnDataTransmitted += OnDialogDataReceived;
+            DataMessaging dataMessaging = new DataMessaging();
+            dataMessaging.OnDataTransmittedEvent += OnDialogDataReceived;
             Loaded = new RelayCommand(Loaded_Command);
             Rendered = new RelayCommand(Rendered_Command);
         }
 
-        private void OnDialogDataReceived(MessageData data)
+        private void OnDialogDataReceived(DialogData data)
         {
             
         }

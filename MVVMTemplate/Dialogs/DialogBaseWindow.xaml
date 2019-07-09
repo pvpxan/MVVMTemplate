@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MVVMTemplate"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="140" Width="400"
+        Title="{Binding WindowTitle}" Height="140" Width="400"
         ResizeMode="NoResize" TabIndex="50"
         Icon="{Binding WindowIcon}"
-        BorderThickness="1" BorderBrush="#FF007ACC" Background="{Binding Background}"
+        BorderThickness="1" BorderBrush="#FF007ACC" Background="Black"
         WindowStyle="{Binding DialogWindowStyle}" Topmost="{Binding Topmost}"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner">

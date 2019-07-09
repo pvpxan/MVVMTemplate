@@ -5,18 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
+// https://www.technical-recipes.com/2017/how-to-use-interaction-triggers-to-handle-user-initiated-events-in-wpf-mvvm/
+// https://www.technical-recipes.com/2016/using-relaycommand-icommand-to-handle-events-in-wpf-and-mvvm/
+
 namespace MVVMTemplate
 {
     // START MVVM RelayCommand Class ----------------------------------------------------------------------------------------------------
     public class RelayCommand<T> : ICommand
     {
-        private readonly Predicate<T> _canExecute;
-        private readonly Action<T> _execute;
+        private readonly Predicate<T> predicateExecute;
+        private readonly Action<T> actionExecute;
 
-        public RelayCommand(Action<T> execute)
-           : this(execute, null)
+        public RelayCommand(Action<T> execute) : this(execute, null)
         {
-            _execute = execute;
+            actionExecute = execute;
         }
 
         public RelayCommand(Action<T> execute, Predicate<T> canExecute)
@@ -25,18 +27,18 @@ namespace MVVMTemplate
             {
                 throw new ArgumentNullException("execute");
             }
-            _execute = execute;
-            _canExecute = canExecute;
+            actionExecute = execute;
+            predicateExecute = canExecute;
         }
 
         public bool CanExecute(object parameter)
         {
-            return _canExecute == null || _canExecute((T)parameter);
+            return predicateExecute == null || predicateExecute((T)parameter);
         }
 
         public void Execute(object parameter)
         {
-            _execute((T)parameter);
+            actionExecute((T)parameter);
         }
 
         public event EventHandler CanExecuteChanged
@@ -48,12 +50,12 @@ namespace MVVMTemplate
 
     public class RelayCommand : ICommand
     {
-        private readonly Predicate<object> _canExecute;
-        private readonly Action<object> _execute;
+        private readonly Predicate<object> predicateExecute;
+        private readonly Action<object> actionExecute;
 
         public RelayCommand(Action<object> execute) : this(execute, null)
         {
-            _execute = execute;
+            actionExecute = execute;
         }
 
         public RelayCommand(Action<object> execute, Predicate<object> canExecute)
@@ -62,18 +64,18 @@ namespace MVVMTemplate
             {
                 throw new ArgumentNullException("execute");
             }
-            _execute = execute;
-            _canExecute = canExecute;
+            actionExecute = execute;
+            predicateExecute = canExecute;
         }
 
         public bool CanExecute(object parameter)
         {
-            return _canExecute == null || _canExecute(parameter);
+            return predicateExecute == null || predicateExecute(parameter);
         }
 
         public void Execute(object parameter)
         {
-            _execute(parameter);
+            actionExecute(parameter);
         }
 
         // Ensures WPF commanding infrastructure asks all RelayCommand objects whether their

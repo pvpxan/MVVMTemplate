@@ -20,13 +20,15 @@ namespace MVVMTemplate
     /// </summary>
     public partial class DialogBaseWindow : Window
     {
+        private DialogBaseWindowViewModel dialogBaseWindowViewModel = null;
+
         public DialogBaseWindow()
         {
             try
             {
                 InitializeComponent();
 
-                Closing += OnWindowClosing;
+                Loaded += contentLoaded;
             }
             catch (Exception Ex)
             {
@@ -34,13 +36,25 @@ namespace MVVMTemplate
             }
         }
 
-        public void OnWindowClosing(object sender, CancelEventArgs e)
+        private void contentLoaded(object sender, RoutedEventArgs e)
         {
-            DialogBaseWindowViewModel dialog_base_window_viewmodel = DataContext as DialogBaseWindowViewModel;
+            dialogBaseWindowViewModel = DataContext as DialogBaseWindowViewModel;
+            dialogBaseWindowViewModel.DialogWindow = this;
 
-            if (dialog_base_window_viewmodel.RequireResult)
+            ContentRendered += contentRendered;
+            Closing += onWindowClosing;
+        }
+
+        private void contentRendered(object sender, EventArgs e)
+        {
+            dialogBaseWindowViewModel.WindowRenderedEvent.ContentRendered();
+        }
+
+        private void onWindowClosing(object sender, CancelEventArgs e)
+        {
+            if (dialogBaseWindowViewModel.RequireResult)
             {
-                if (dialog_base_window_viewmodel.UserDialogResult == dialog_base_window_viewmodel.DefaultDialogResult)
+                if (dialogBaseWindowViewModel.UserDialogResult == dialogBaseWindowViewModel.DefaultDialogResult)
                 {
                     e.Cancel = true;
                 }
@@ -48,10 +62,9 @@ namespace MVVMTemplate
         }
     }
 
-    public abstract class DialogBaseWindowViewModel : ViewModelBase
+    public class DialogBaseWindowViewModel : ViewModelBase
     {
-        public string Title { get; private set; }
-        public Brush Background { get; private set; }
+        public string WindowTitle { get; private set; }
         public bool Topmost { get; private set; }
 
         public WindowStyle DialogWindowStyle { get; private set; }
@@ -63,12 +76,13 @@ namespace MVVMTemplate
         public WindowMessageResult UserDialogResult { get; private set; }
         public WindowMessageResult DefaultDialogResult = WindowMessageResult.Undefined;
 
+        public Window DialogWindow = null;
+        public ControlContentRendered WindowRenderedEvent = new ControlContentRendered();
+
         public DialogBaseWindowViewModel(DialogData data)
         {
-            Title = data.Title;
+            WindowTitle = data.WindowTitle;
             Topmost = data.Topmost;
-            Background = data.Background;
-
             DialogWindowStyle = data.DialogWindowStyle;
 
             try

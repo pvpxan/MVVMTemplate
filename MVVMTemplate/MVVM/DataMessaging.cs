@@ -7,27 +7,99 @@ using System.Windows;
 
 namespace MVVMTemplate
 {
-    public static class DataMessaging
+    public class TextAggregator
     {
-        public static void Transmit(MessageData data)
+        public void Transmit(string data)
         {
-            if (OnDataTransmitted != null)
+            if (OnDataTransmittedEvent != null)
             {
-                App.Current.Dispatcher.Invoke((Action)delegate
+                Application.Current.Dispatcher.Invoke((Action)delegate
                 {
-                    OnDataTransmitted(data);
+                    OnDataTransmittedEvent(data);
                 });
             }
         }
 
-        public static Action<MessageData> OnDataTransmitted;
+        public Action<string> OnDataTransmittedEvent;
     }
 
-    public class MessageData
+    public class IntAggregator
     {
-        public string message = "";
-        public string title = "";
-        public string hyperlink = "";
-        public MessageBoxImage type { get; set; }
+        public void Transmit(int data)
+        {
+            if (OnDataTransmittedEvent != null)
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    OnDataTransmittedEvent(data);
+                });
+            }
+        }
+
+        public Action<int> OnDataTransmittedEvent;
+    }
+
+    public class BoolAggregator
+    {
+        public void Transmit(bool data)
+        {
+            if (OnDataTransmittedEvent != null)
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    OnDataTransmittedEvent(data);
+                });
+            }
+        }
+
+        public Action<bool> OnDataTransmittedEvent;
+    }
+
+    public class IInputElementAggregator
+    {
+        public void Transmit(IInputElement data)
+        {
+            if (OnDataTransmittedEvent != null)
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    OnDataTransmittedEvent(data);
+                });
+            }
+        }
+
+        public Action<IInputElement> OnDataTransmittedEvent;
+    }
+
+    public class ObjectAggregator
+    {
+        public void Transmit(object data)
+        {
+            if (OnDataTransmittedEvent != null)
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    OnDataTransmittedEvent(data);
+                });
+            }
+        }
+
+        public Action<object> OnDataTransmittedEvent;
+    }
+
+    public class DataMessaging
+    {
+        public void Transmit(DialogData data)
+        {
+            if (OnDataTransmittedEvent != null)
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    OnDataTransmittedEvent(data);
+                });
+            }
+        }
+
+        public Action<DialogData> OnDataTransmittedEvent;
     }
 }

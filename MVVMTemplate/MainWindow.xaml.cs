@@ -111,12 +111,12 @@ namespace MVVMTemplate
         {
             DialogData data = new DialogData()
             {
-                Title = "Example...",
-                Caption = "This is a sample message...",
-                Content = "The is the body of the dialog.",
+                WindowTitle = "Example...",
+                ContentHeader = "This is a sample message...",
+                ContentBody = "The is the body of the dialog.",
                 DialogWindowStyle = WindowStyle.SingleBorderWindow,
                 WindowIconURI = "pack://application:,,,/Resources/gear_icon2.ico",
-                Buttons = DialogButtons.Ok,
+                MessageButtons = WindowMessageButtons.Ok,
             };
 
             Statics.OpenWindowsDialog(data, parameter as Window);
@@ -127,7 +127,7 @@ namespace MVVMTemplate
         {
             DialogData data = new DialogData()
             {
-                Title = "Example...",
+                WindowTitle = "Example...",
                 DialogWindowStyle = WindowStyle.SingleBorderWindow,
                 WindowIconURI = "pack://application:,,,/Resources/gear_icon2.ico",
                 Topmost = true,

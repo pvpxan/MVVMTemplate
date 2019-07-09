@@ -83,9 +83,9 @@ namespace MVVMTemplate
 
         // Logs an exception message in a specific format for a log file.
         // -----------------------------------------------------------------------
-        public static void Exception(string log, Exception Ex)
+        public static void Exception(string log, Exception ex)
         {
-            string message = log + Environment.NewLine + Convert.ToString(Ex);
+            string message = log + Environment.NewLine + Convert.ToString(ex);
             LogEntry(message);
         }
 
@@ -132,126 +132,5 @@ namespace MVVMTemplate
         //}
     }
     // END LogWriter_Class --------------------------------------------------------------------------------------------------------------
-
-    // START LogWriterWPF_Class ---------------------------------------------------------------------------------------------------------
-    public static class LogWriterWPF
-    {
-        // This class allows for displaying of messages before they are logged with LogWriterConsole
-
-        private static Window currentWindow = null;
-
-        // Define the active current window.
-        // -----------------------------------------------------------------------
-        private static void setCurrentWindow()
-        {
-            try
-            {
-                currentWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive);
-            }
-            catch
-            {
-                currentWindow = null;
-            }
-        }
-        // -----------------------------------------------------------------------
-
-        // -----------------------------------------------------------------------
-        public static void LogDisplay(string log, MessageBoxImage messageType, Window window = null)
-        {
-            if (window == null)
-            {
-                setCurrentWindow();
-                if (currentWindow != null)
-                {
-                    window = currentWindow;
-                }
-            }
-
-            string message = log;
-            string caption = "Error...";
-            MessageBoxImage messageBoxImage = messageType;
-
-            LogWriter.LogEntry(log);
-
-            switch (messageBoxImage)
-            {
-                case MessageBoxImage.Error:
-                    caption = "Error...";
-                    break;
-
-                case MessageBoxImage.Exclamation:
-                    caption = "Important...";
-                    break;
-
-                case MessageBoxImage.Information:
-                    caption = "Information...";
-                    break;
-
-                case MessageBoxImage.None:
-                    caption = "Message...";
-                    break;
-
-                case MessageBoxImage.Question:
-                    caption = "Question...";
-                    break;
-
-                default:
-                    break;
-            }
-
-            Application.Current.Dispatcher.Invoke((Action)delegate
-            {
-                if (window != null)
-                {
-                    MessageBox.Show(window, message, caption, MessageBoxButton.OK, messageBoxImage);
-                }
-                else
-                {
-                    MessageBox.Show(message, caption, MessageBoxButton.OK, messageBoxImage);
-                }
-            });
-        }
-
-        // -----------------------------------------------------------------------
-        public static void ExceptionDisplay(string log, Exception Ex, bool showFull, Window window = null)
-        {
-            string message = log + Environment.NewLine + Convert.ToString(Ex);
-            LogWriter.LogEntry(message);
-
-            if (window == null)
-            {
-                setCurrentWindow();
-                if (currentWindow != null)
-                {
-                    window = currentWindow;
-                }
-            }
-
-            if (showFull == false)
-            {
-                message = log;
-            }
-
-            Application.Current.Dispatcher.Invoke((Action)delegate
-            {
-                if (window != null)
-                {
-                    MessageBox.Show(window, message, "Error...", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                else
-                {
-                    MessageBox.Show(message, "Error...", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            });
-        }
-
-        // TODO: More for this later.
-        // -----------------------------------------------------------------------
-        //public static void LogFailure()
-        //{
-
-        //}
-    }
-    // END LogWriterWPF_Class -----------------------------------------------------------------------------------------------------------
 }
 

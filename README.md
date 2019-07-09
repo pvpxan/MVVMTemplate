@@ -1,2 +1,2 @@
 # MVVMTemplate
-My own template for MVVM desktop applications. Has custom dialog messages.
+Sample application and template for using code from StreamlineMVVM Framwork. Has custom dialog messages.

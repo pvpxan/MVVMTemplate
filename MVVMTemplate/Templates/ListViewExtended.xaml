@@ -1,0 +1,167 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ext="clr-namespace:MVVMTemplate">
+
+    <!-- START Custom Listview Template -->
+    <ControlTemplate x:Key="Selected_Photo_Template" TargetType="{x:Type ListViewItem}">
+        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="19" Margin="0,0,0,0" BorderBrush="LightGray" BorderThickness="1">
+
+            <Border.Style>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="#FF74A1C7" Offset="0.5"/>
+                                <GradientStop Color="SteelBlue" Offset="0.5"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                        <GradientStop Color="#FFD3EAF1" Offset="0.5"/>
+                                        <GradientStop Color="LightBlue" Offset="0.5"/>
+                                    </LinearGradientBrush>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <!-- Bind the double click to a command in the parent view model -->
+            <Border.InputBindings>
+                <MouseBinding Gesture="LeftDoubleClick" 
+                                  CommandParameter="{Binding SelectedItems, ElementName=selected_files_listview}"
+                                  Command="{Binding Path=DataContext.Selected_DoubleClick, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+            </Border.InputBindings>
+            <TextBlock Margin="6,0,0,0" Text="{Binding Display}" />
+        </Border>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="FTP_Photo_Template" TargetType="{x:Type ListViewItem}">
+
+        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="19" Margin="0,0,0,0" BorderBrush="LightGray" BorderThickness="1">
+            <Border.Style>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="#FF74A1C7" Offset="0.5"/>
+                                <GradientStop Color="SteelBlue" Offset="0.5"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                        <GradientStop Color="#FFD3EAF1" Offset="0.5"/>
+                                        <GradientStop Color="LightBlue" Offset="0.5"/>
+                                    </LinearGradientBrush>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <!-- Bind the double click to a command in the parent view model -->
+            <Border.InputBindings>
+                <MouseBinding Gesture="LeftDoubleClick" 
+                                  CommandParameter="{Binding SelectedItems, ElementName=ftp_files_listview}"
+                                  Command="{Binding Path=DataContext.FTP_DoubleClick, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
+            </Border.InputBindings>
+            <TextBlock Margin="6,0,0,0" Text="{Binding Display}" />
+        </Border>
+    </ControlTemplate>
+    <!-- END Custom Listview Template -->
+
+    <!-- START ListBoxItem style. -->
+    <Style x:Key="CustomListBoxItemStyle" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Padding" Value="4,1"/>
+        <Setter Property="HorizontalContentAlignment"
+                    Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}"/>
+        <Setter Property="VerticalContentAlignment"
+                    Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type ItemsControl}}}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
+
+        <Setter Property="FocusVisualStyle">
+            <Setter.Value>
+                <Style>
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Rectangle Margin="2" SnapsToDevicePixels="True"
+                                               Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                                               StrokeDashArray="1 2"
+                                               StrokeThickness="1"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                    <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Content="{TemplateBinding Content}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Bd" Property="Background" Value="#1F26A0DA"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#A826A0DA"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Selector.IsSelectionActive" Value="False"/>
+                                <Condition Property="IsSelected" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Bd" Property="Background" Value="#3DDADADA"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#FFDADADA"/>
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Selector.IsSelectionActive" Value="True"/>
+                                <Condition Property="IsSelected" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Bd" Property="Background" Value="#3D26A0DA"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#FF26A0DA"/>
+                        </MultiTrigger>
+
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter Property="IsSelected" Value="True" />
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!-- END ListBoxItem style. -->
+
+</ResourceDictionary>
