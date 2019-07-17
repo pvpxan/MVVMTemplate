@@ -13,5 +13,21 @@
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner">
 
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:WindowsMessageViewModel}">
+            <local:WindowsMessage/>
+        </DataTemplate>
+    </Window.Resources>
+
+    <!--
+When adding a custom dialog control that uses this window, add below to a merged dictionary in App.xaml
+    
+    <ResourceDictionary>
+        <DataTemplate DataType="{x:Type local:CustomControlViewModel}">
+            <local:CustomControl/>
+        </DataTemplate>
+    </ResourceDictionary>
+-->
+    
     <ContentPresenter x:Name="ContentPresenter" Content="{Binding}"></ContentPresenter>
 </Window>

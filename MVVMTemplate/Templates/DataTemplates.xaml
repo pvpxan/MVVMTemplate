@@ -2,6 +2,23 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:MVVMTemplate">
 
+<!--
+    References to styles/templates for improved controls.
+    
+    Embedding Note:
+    If using this DLL as an Embedded Resource, ONLY reference these from the window they are used in.
+            
+    xmlns:ext="clr-namespace:StreamlineMVVM;assembly=StreamlineMVVM"
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/StreamlineMVVM;component/Templates/DataTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+-->
+    
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Templates/ButtonExtended.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Templates/CheckBox.xaml" />
@@ -9,15 +26,6 @@
         <ResourceDictionary Source="pack://application:,,,/Templates/GroupBoxImproved.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Templates/ListViewExtended.xaml" />
         <ResourceDictionary Source="pack://application:,,,/Templates/ScrollBarExtended.xaml" />
-
-        <!-- START User defined custom dialog DataTypes -->
-        <ResourceDictionary>
-            <DataTemplate DataType="{x:Type local:WindowsMessageViewModel}">
-                <local:WindowsMessage/>
-            </DataTemplate>
-        </ResourceDictionary>
-        <!-- END User defined custom dialog DataTypes -->
-
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>
