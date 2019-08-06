@@ -13,6 +13,6 @@
                Margin="0,30,0,0" Height="30" Width="200" Padding="0"
                Foreground="White" FontFamily="Arial" FontSize="16"
                TabIndex="0"
-               Content="{Binding UI_Message}"/>
+               Content="{Binding UIMessage}"/>
     </Grid>
 </UserControl>

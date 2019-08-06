@@ -25,21 +25,21 @@ namespace MVVMTemplate
 
         public CustomDialog()
         {
-            MainWindow main_window = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+            MainWindow mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
 
             try
             {
                 InitializeComponent();
 
-                Loaded += Content_Loaded;
+                Loaded += contentLoaded;
             }
             catch (Exception Ex)
             {
-                MessageBox.Show(main_window, "Control load error: " + Environment.NewLine + Convert.ToString(Ex), "Error...", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(mainWindow, "Control load error: " + Environment.NewLine + Convert.ToString(Ex), "Error...", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void Content_Loaded(object sender, RoutedEventArgs e)
+        private void contentLoaded(object sender, RoutedEventArgs e)
         {
             // Gets the Window object reference encapsulating this control.
             window = Window.GetWindow(this);
@@ -96,17 +96,17 @@ namespace MVVMTemplate
         // Bound Variables
         // ---------------------------------------------------------------------------------------------------------------------------------------------
         // -----------------------------------------------------
-        private string _UI_Message = "UI Message...";
-        public string UI_Message
+        private string _UIMessage = "UI Message...";
+        public string UIMessage
         {
             get
             {
-                return _UI_Message;
+                return _UIMessage;
             }
             set
             {
-                _UI_Message = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("UI_Message"));
+                _UIMessage = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("UIMessage"));
             }
         }
         // ---------------------------------------------------------------------------------------------------------------------------------------------

@@ -414,7 +414,10 @@ namespace MVVMTemplate
         public ICommand Rendered { get; private set; }
         private void renderedCommand(object parameter)
         {
-            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { })).Wait();
+            if (Application.Current != null)
+            {
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => { })).Wait();
+            }
         }
 
         // -----------------------------------------------------

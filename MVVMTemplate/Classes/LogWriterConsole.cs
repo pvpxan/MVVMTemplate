@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,10 @@ namespace MVVMTemplate
     public static class LogWriter
     {
         // This class is a simple thread safe log writer/displayer.
-
         private static ReaderWriterLockSlim logLocker = new ReaderWriterLockSlim();
+
+        // Since this class spins up threads, there is a possiblity that a console app can close before a thread finishes.
+        public static ConcurrentQueue<string> LogQueue = new ConcurrentQueue<string>();
 
         private static string logApplication = "";
         private static string logPath = "";
@@ -97,6 +100,8 @@ namespace MVVMTemplate
             var source = new CancellationTokenSource();
             var token = source.Token;
 
+            LogQueue.Enqueue(log);
+
             // Creates a thread that will write to a log file.
             Task.Factory.StartNew(() =>
             {
@@ -121,6 +126,7 @@ namespace MVVMTemplate
                 }
             }
 
+            LogQueue.TryDequeue(out string loggedMessage);
             logLocker.ExitWriteLock();
         }
 

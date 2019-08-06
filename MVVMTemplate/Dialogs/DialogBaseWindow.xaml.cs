@@ -24,10 +24,15 @@ namespace MVVMTemplate
 
         public DialogBaseWindow()
         {
+            if (Application.Current == null)
+            {
+                MessageBox.Show(this, "Window load error: " + Environment.NewLine + "The Application object has been shutdown or is null.", "Error...", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             try
             {
                 InitializeComponent();
-
                 Loaded += contentLoaded;
             }
             catch (Exception Ex)
@@ -66,6 +71,7 @@ namespace MVVMTemplate
     {
         public string WindowTitle { get; private set; }
         public bool Topmost { get; private set; }
+        public WindowStartupLocation DialogStartupLocation { get; set; }
 
         public WindowStyle DialogWindowStyle { get; private set; }
         public ImageSource WindowIcon { get; private set; }
@@ -83,6 +89,7 @@ namespace MVVMTemplate
         {
             WindowTitle = data.WindowTitle;
             Topmost = data.Topmost;
+            DialogStartupLocation = data.DialogStartupLocation;
             DialogWindowStyle = data.DialogWindowStyle;
 
             try
