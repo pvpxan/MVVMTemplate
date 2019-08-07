@@ -12,54 +12,45 @@ namespace MVVMTemplate
     {
         // This class allows for displaying of messages before they are logged with LogWriterConsole
 
-        private static Window currentWindow = null;
-
         // Define the active current window.
         // -----------------------------------------------------------------------
-        private static void setCurrentWindow()
+        private static Window getCurrentWindow()
         {
+            if (Application.Current == null)
+            {
+                return null;
+            }
+
+            Window currentWindow = null;
+
             try
             {
                 currentWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive);
             }
             catch
             {
+                // Nothing can really be done here.
+            }
+
+            try
+            {
                 if (Application.Current.Windows.Count > 0)
                 {
                     currentWindow = Application.Current.Windows[0];
                 }
             }
-        }
-        // -----------------------------------------------------------------------
-
-        // -----------------------------------------------------------------------
-        public static void LogDisplay(string log, MessageBoxImage messageType)
-        {
-            logDisplay(log, messageType);
-        }
-
-        public static void LogDisplay(string log, MessageBoxImage messageType, Window window)
-        {
-            logDisplay(log, messageType, window);
-        }
-
-        private static void logDisplay(string log, MessageBoxImage messageType, Window window = null)
-        {
-            if (window == null)
+            catch
             {
-                setCurrentWindow();
-                if (currentWindow != null)
-                {
-                    window = currentWindow;
-                }
+                // Nothing can really be done here.
             }
 
+            return currentWindow;
+        }
+
+        private static void displayMessage(string log, MessageBoxImage messageBoxImage, Window window = null)
+        {
             string message = log;
             string caption = "Error...";
-            MessageBoxImage messageBoxImage = messageType;
-
-            LogWriter.LogEntry(log);
-
             switch (messageBoxImage)
             {
                 case MessageBoxImage.Error:
@@ -86,60 +77,72 @@ namespace MVVMTemplate
                     break;
             }
 
-            Application.Current.Dispatcher.Invoke((Action)delegate
+            if (Application.Current == null)
             {
-                if (window != null)
+                openMessageBox(message, caption, messageBoxImage, window);
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
                 {
-                    MessageBox.Show(window, message, caption, MessageBoxButton.OK, messageBoxImage);
-                }
-                else
-                {
-                    MessageBox.Show(message, caption, MessageBoxButton.OK, messageBoxImage);
-                }
-            });
+                    openMessageBox(message, caption, messageBoxImage, window);
+                });
+            }
+        }
+
+        private static void openMessageBox(string message, string caption, MessageBoxImage messageBoxImage, Window window = null)
+        {
+            if (window == null)
+            {
+                window = getCurrentWindow();
+            }
+
+            if (window != null)
+            {
+                MessageBox.Show(window, message, caption, MessageBoxButton.OK, messageBoxImage);
+            }
+            else
+            {
+                MessageBox.Show(message, caption, MessageBoxButton.OK, messageBoxImage);
+            }
+        }
+
+        // -----------------------------------------------------------------------
+        public static void LogDisplay(string log, MessageBoxImage messageBoxImage)
+        {
+            LogWriter.LogEntry(log);
+            displayMessage(log, messageBoxImage);
+        }
+
+        public static void LogDisplay(string log, MessageBoxImage messageBoxImage, Window window)
+        {
+            LogWriter.LogEntry(log);
+            displayMessage(log, messageBoxImage, window);
         }
 
         // -----------------------------------------------------------------------
         public static void ExceptionDisplay(string log, Exception ex, bool showFull)
         {
+            LogWriter.Exception(log, ex);
             exceptionDisplay(log, ex, showFull);
         }
 
         public static void ExceptionDisplay(string log, Exception ex, bool showFull, Window window)
         {
+            LogWriter.Exception(log, ex);
             exceptionDisplay(log, ex, showFull, window);
         }
 
         private static void exceptionDisplay(string log, Exception ex, bool showFull, Window window = null)
         {
             string message = log + Environment.NewLine + Convert.ToString(ex);
-            LogWriter.LogEntry(message);
-
-            if (window == null)
-            {
-                setCurrentWindow();
-                if (currentWindow != null)
-                {
-                    window = currentWindow;
-                }
-            }
 
             if (showFull == false)
             {
                 message = log;
             }
 
-            Application.Current.Dispatcher.Invoke((Action)delegate
-            {
-                if (window != null)
-                {
-                    MessageBox.Show(window, message, "Error...", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                else
-                {
-                    MessageBox.Show(message, "Error...", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            });
+            displayMessage(message, MessageBoxImage.Error, window);
         }
 
         // TODO: More for this later.
