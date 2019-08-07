@@ -60,44 +60,19 @@ namespace MVVMTemplate
         // ---------------------------------------------------------------------------------------------------------------------------------------------
         public MainWindowViewModel()
         {
-            Loaded = new RelayCommand(Loaded_Command);
+            Loaded = new RelayCommand(loadedCommand);
             OpenDialog = new RelayCommand(OpenDialogCommand);
         }
-        // ---------------------------------------------------------------------------------------------------------------------------------------------
 
-        // Bound Commands
-        // ---------------------------------------------------------------------------------------------------------------------------------------------
         // ------------------------------------------------------
-        private ICommand _Loaded;
-        public ICommand Loaded
-        {
-            get
-            {
-                return _Loaded;
-            }
-            set
-            {
-                _Loaded = value;
-            }
-        }
-        private void Loaded_Command(object parameter)
+        public ICommand Loaded { get; private set; }
+        private void loadedCommand(object parameter)
         {
             window = parameter as Window;
         }
 
         // ------------------------------------------------------
-        private ICommand _OpenDialog;
-        public ICommand OpenDialog
-        {
-            get
-            {
-                return _OpenDialog;
-            }
-            set
-            {
-                _OpenDialog = value;
-            }
-        }
+        public ICommand OpenDialog { get; private set; }
         private void OpenDialogCommand(object parameter)
         {
             ExampleOne(parameter);
