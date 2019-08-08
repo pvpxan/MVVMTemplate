@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,6 +10,12 @@ using System.Threading.Tasks;
 namespace MVVMTemplate
 {
     // START INI_Class ------------------------------------------------------------------------------------------------------------------
+    public class INIKeyValuePair
+    {
+        public string Key = "";
+        public string Value = "";
+    }
+
     public static class INI
     {
         private static ReaderWriterLockSlim iniLocker = new ReaderWriterLockSlim();
@@ -28,12 +35,13 @@ namespace MVVMTemplate
         public static int? ReadInt(string file, string key)
         {
             string value = Read(file, key);
-            if (Regex.IsMatch(value, @"^\d+$") == false)
+            int parsed;
+            if (int.TryParse(value, out parsed) == false)
             {
                 return null;
             }
 
-            return Convert.ToInt32(value);
+            return parsed;
         }
 
         public static string Read(string file, string key)
@@ -51,7 +59,7 @@ namespace MVVMTemplate
                 return "";
             }
 
-            if (System.IO.File.Exists(file) == false)
+            if (File.Exists(file) == false)
             {
                 return "";
             }
@@ -60,7 +68,7 @@ namespace MVVMTemplate
 
             try
             {
-                iniFile = System.IO.File.ReadAllLines(file); // Reads all the lines of the ini file to an array.
+                iniFile = File.ReadAllLines(file); // Reads all the lines of the ini file to an array.
             }
             catch (Exception Ex)
             {
@@ -96,28 +104,46 @@ namespace MVVMTemplate
 
         public static bool Write(string file, string key, string value, bool create, bool backup)
         {
-            iniLocker.EnterWriteLock();
-            bool success = safeWrite(file, key, value, create, backup);
-            iniLocker.ExitWriteLock();
-            return success;
-        }
-
-        private static bool safeWrite(string file, string key, string value, bool create, bool backup)
-        {
-            if (file == null || key == null || value == null)
+            if (string.IsNullOrEmpty(file) || string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
             {
                 return false;
             }
 
-            if (System.IO.File.Exists(file) == false && create == false)
+            INIKeyValuePair[] iniKeyValueSettings = new INIKeyValuePair[]
+            {
+                new INIKeyValuePair(){ Key = key, Value = value},
+            };
+
+            iniLocker.EnterWriteLock();
+            bool success = safeWrite(file, iniKeyValueSettings, create, backup);
+            iniLocker.ExitWriteLock();
+            return success;
+        }
+
+        public static bool MultiWrite(string file, INIKeyValuePair[] iniKeyValueSettings, bool create, bool backup)
+        {
+            if (string.IsNullOrEmpty(file) || iniKeyValueSettings == null || iniKeyValueSettings.Length <= 0)
+            {
+                return false;
+            }
+
+            iniLocker.EnterWriteLock();
+            bool success = safeWrite(file, iniKeyValueSettings, create, backup);
+            iniLocker.ExitWriteLock();
+            return success;
+        }
+
+        private static bool safeWrite(string file, INIKeyValuePair[] iniKeyValueSettings, bool create, bool backup)
+        {
+            if (File.Exists(file) == false && create == false)
             {
                 LogWriter.LogEntry("INI write failure. File does not exist: " + file);
                 return false;
             }
 
-            if (System.IO.File.Exists(file) == false && create)
+            if (File.Exists(file) == false && create)
             {
-                if (writeAllLines(file, new string[] { key + "=" + value, }, backup))
+                if (writeAllLines(file, getAllText(iniKeyValueSettings), backup))
                 {
                     return true;
                 }
@@ -125,12 +151,11 @@ namespace MVVMTemplate
                 return false;
             }
 
-            // File should exists at this point.
-            List<string> iniFile = null;
-
+            // File should already exists at this point.
+            string[] iniFile = null;
             try
             {
-                iniFile = System.IO.File.ReadAllLines(file).ToList(); // Read the file to a List<string>
+                iniFile = File.ReadAllLines(file); // Read the file to a List<string>
             }
             catch (Exception Ex)
             {
@@ -138,9 +163,10 @@ namespace MVVMTemplate
                 return false;
             }
 
-            if (iniFile.Count <= 0)
+            // If the file is empty, just write directly to it.
+            if (iniFile == null || iniFile.Length <= 0)
             {
-                if (writeAllLines(file, new string[] { key + "=" + value, }, backup))
+                if (writeAllLines(file, getAllText(iniKeyValueSettings), backup))
                 {
                     return true;
                 }
@@ -148,27 +174,41 @@ namespace MVVMTemplate
                 return false;
             }
 
-            bool updated = false;
-
-            // Checks each line of the array to see if it matches ini format and if it contains the item we want to update.
-            for (int i = 0; i < iniFile.Count; i++)
+            // Converts the lines to a List<INIKeyValuePair>.
+            // This will check each line to make sure it is in the proper format for an INI file.
+            List<INIKeyValuePair> iniFileKeyValueList = new List<INIKeyValuePair>();
+            for (int i = 0; i < iniFile.Length; i++)
             {
                 string line = iniFile[i].ToLower();
-
-                if (line.Contains(key.ToLower()) && line.Contains("="))
+                if (line.Contains("=") == false)
                 {
-                    iniFile[i] = key + "=" + value;
-                    updated = true;
-                    break;
+                    continue;
+                }
+
+                string[] parts = line.Split('=');
+                if (parts.Length > 2)
+                {
+                    continue;
+                }
+
+                iniFileKeyValueList.Add(new INIKeyValuePair() { Key = parts[0], Value = parts[1] });
+            }
+
+            // Checks the parameters to see if there are any new Key/Value pairs that need to be added or updated.
+            foreach (INIKeyValuePair iniKeyValue in iniKeyValueSettings)
+            {
+                int index = iniFileKeyValueList.FindIndex(k => k.Key.ToLower() == iniKeyValue.Key.ToLower());
+                if (index > -1)
+                {
+                    iniFileKeyValueList[index].Value = iniKeyValue.Value;
+                }
+                else
+                {
+                    iniFileKeyValueList.Add(new INIKeyValuePair() { Key = iniKeyValue.Key, Value = iniKeyValue.Value });
                 }
             }
 
-            if (updated == false)
-            {
-                iniFile.Add(key + "=" + value);
-            }
-
-            if (writeAllLines(file, iniFile.ToArray(), backup))
+            if (writeAllLines(file, getAllText(iniFileKeyValueList.ToArray()), backup))
             {
                 return true;
             }
@@ -176,14 +216,35 @@ namespace MVVMTemplate
             return false;
         }
 
-        private static bool writeAllLines(string file, string[] lines, bool backup)
+        private static string getAllText(INIKeyValuePair[] iniKeyValueList)
+        {
+            string allText = "";
+            foreach (INIKeyValuePair iniKeyValuePair in iniKeyValueList)
+            {
+                if (string.IsNullOrEmpty(iniKeyValuePair.Key))
+                {
+                    continue;
+                }
+
+                if (iniKeyValuePair.Value == null)
+                {
+                    iniKeyValuePair.Value = "";
+                }
+
+                allText = allText + iniKeyValuePair.Key + "=" + iniKeyValuePair.Value + Environment.NewLine;
+            }
+
+            return allText;
+        }
+
+        private static bool writeAllLines(string file, string allText, bool backup)
         {
             string tempFile = "";
 
             try
             {
-                tempFile = string.Format(@"{0}\{1}_Temp.ini", System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file));
-                System.IO.File.WriteAllLines(tempFile, lines);
+                tempFile = string.Format(@"{0}\{1}_Temp.ini", Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+                File.WriteAllText(tempFile, allText);
             }
             catch (Exception Ex)
             {
@@ -197,8 +258,12 @@ namespace MVVMTemplate
 
                 try
                 {
-                    backFile = string.Format(@"{0}\{1}_Back.ini", System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file));
-                    System.IO.File.Copy(file, backFile, true);
+                    backFile = string.Format(@"{0}\{1}_Back.ini", Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+
+                    if (File.Exists(file))
+                    {
+                        File.Copy(file, backFile, true);
+                    }
                 }
                 catch (Exception Ex)
                 {
@@ -208,8 +273,8 @@ namespace MVVMTemplate
 
             try
             {
-                System.IO.File.Copy(tempFile, file, true);
-                System.IO.File.Delete(tempFile);
+                File.Copy(tempFile, file, true);
+                File.Delete(tempFile);
             }
             catch (Exception Ex)
             {
