@@ -46,60 +46,82 @@ namespace MVVMTemplate
 
         public static string Read(string file, string key)
         {
+            if (string.IsNullOrEmpty(file) || string.IsNullOrEmpty(key) || File.Exists(file) == false)
+            {
+                return "";
+            }
+
             iniLocker.EnterReadLock();
-            string value = safeRead(file, key);
+            string value = safeReadKey(file, key);
             iniLocker.ExitReadLock();
             return value;
         }
 
-        private static string safeRead(string file, string key)
+        private static string safeReadKey(string file, string key)
         {
-            if (file == null || key == null)
+            INIKeyValuePair[] iniFileKeyValueList = safeReadFile(file);
+
+            // Checks list for the key and returns the value if found.
+            string value = iniFileKeyValueList.FirstOrDefault(k => k.Key.ToLower() == key.ToLower()).Value;
+            if (string.IsNullOrEmpty(value))
             {
                 return "";
             }
 
-            if (File.Exists(file) == false)
+            return value;
+        }
+
+        public static INIKeyValuePair[] ReadFile(string file)
+        {
+            if (string.IsNullOrEmpty(file) || File.Exists(file) == false)
             {
-                return "";
+                return new INIKeyValuePair[0];
             }
 
+            iniLocker.EnterReadLock();
+            INIKeyValuePair[] iniFileKeyValueList = safeReadFile(file);
+            iniLocker.ExitReadLock();
+            return iniFileKeyValueList;
+        }
+
+        private static INIKeyValuePair[] safeReadFile(string file)
+        {
             string[] iniFile = null;
-
             try
             {
-                iniFile = File.ReadAllLines(file); // Reads all the lines of the ini file to an array.
+                iniFile = File.ReadAllLines(file); // Read the file to a List<string>
             }
             catch (Exception Ex)
             {
-                LogWriter.Exception("Error reading ini file.", Ex);
-                return "";
+                LogWriter.Exception("Error reading INI file: " + file, Ex);
+                return new INIKeyValuePair[0];
             }
 
-            if (iniFile.Length <= 0) // Checks if there is readable content in the ini file.
+            if (iniFile == null || iniFile.Length <= 0)
             {
-                return "";
+                return new INIKeyValuePair[0];
             }
 
-            // Checks each line of the array to see if it matches ini format and if it contains the item we are searching for.
+            INIKeyValuePair[] iniFileKeyValueList = new INIKeyValuePair[iniFile.Length];
             for (int i = 0; i < iniFile.Length; i++)
             {
-                string lineLower = iniFile[i].ToLower();
-
-                if (lineLower.Contains(key.ToLower()) && lineLower.Contains("=")) // Checks format.
+                string line = iniFile[i].ToLower();
+                if (line.Contains("=") == false)
                 {
-                    string[] keyValuePair = iniFile[i].Split('=');
-
-                    // Checks if line is using key value pair is formated properly. At this point, it should at least have a length of 2.
-                    // If the length is greater than 2, that means multiple '=' which is no good.
-                    if (keyValuePair.Length == 2 && keyValuePair[0].ToLower() == key.ToLower())
-                    {
-                        return keyValuePair[1];
-                    }
+                    continue;
                 }
+
+                string[] parts = line.Split('=');
+                if (parts.Length > 2)
+                {
+                    continue;
+                }
+
+                iniFileKeyValueList[i].Key = parts[0];
+                iniFileKeyValueList[i].Value = parts[1];
             }
 
-            return "";
+            return iniFileKeyValueList;
         }
 
         public static bool Write(string file, string key, string value, bool create, bool backup)
