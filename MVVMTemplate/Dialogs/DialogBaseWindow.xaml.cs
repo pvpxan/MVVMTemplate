@@ -22,7 +22,7 @@ namespace MVVMTemplate
     {
         private DialogBaseWindowViewModel dialogBaseWindowViewModel = null;
 
-        public DialogBaseWindow()
+        public DialogBaseWindow(DialogData dialogData)
         {
             if (Application.Current == null)
             {
@@ -33,6 +33,24 @@ namespace MVVMTemplate
             try
             {
                 InitializeComponent();
+
+                try
+                {
+                    if (dialogData.WindowIconURI.Length > 0)
+                    {
+                        Icon = BitmapFrame.Create(new Uri(dialogData.WindowIconURI, UriKind.RelativeOrAbsolute));
+                    }
+                }
+                catch
+                {
+                    // TODO (DB):  Find a way to extract the application icon and assign it.
+                }
+
+                // General Window properties. Not bound since some are not technically content and one is not able to be bound.
+                WindowStartupLocation = dialogData.DialogStartupLocation; // Cannot be bound since it is a DependencyProperty
+                WindowStyle = dialogData.DialogWindowStyle;
+                Topmost = dialogData.Topmost;
+                Title = dialogData.WindowTitle;
                 Loaded += contentLoaded;
             }
             catch (Exception Ex)
@@ -59,7 +77,7 @@ namespace MVVMTemplate
         {
             if (dialogBaseWindowViewModel.RequireResult)
             {
-                if (dialogBaseWindowViewModel.UserDialogResult == dialogBaseWindowViewModel.DefaultDialogResult)
+                if (dialogBaseWindowViewModel.UserDialogResult == WindowMessageResult.Undefined)
                 {
                     e.Cancel = true;
                 }
@@ -69,44 +87,19 @@ namespace MVVMTemplate
 
     public class DialogBaseWindowViewModel : ViewModelBase
     {
-        public string WindowTitle { get; private set; }
-        public bool Topmost { get; private set; }
-        public WindowStartupLocation DialogStartupLocation { get; set; }
-
-        public WindowStyle DialogWindowStyle { get; private set; }
-        public ImageSource WindowIcon { get; private set; }
+        public DialogData dialogData { get; private set; }
 
         public bool RequireResult { get; private set; }
         public bool CancelAsync { get; private set; }
 
-        public WindowMessageResult UserDialogResult { get; private set; }
-        public WindowMessageResult DefaultDialogResult = WindowMessageResult.Undefined;
+        public WindowMessageResult UserDialogResult = WindowMessageResult.Undefined;
 
         public Window DialogWindow = null;
         public ControlContentRendered WindowRenderedEvent = new ControlContentRendered();
 
         public DialogBaseWindowViewModel(DialogData data)
         {
-            WindowTitle = data.WindowTitle;
-            Topmost = data.Topmost;
-            DialogStartupLocation = data.DialogStartupLocation;
-            DialogWindowStyle = data.DialogWindowStyle;
-
-            try
-            {
-                if (data.WindowIconURI.Length > 0)
-                {
-                    WindowIcon = BitmapFrame.Create(new Uri(data.WindowIconURI, UriKind.RelativeOrAbsolute));
-                }
-                else
-                {
-                    WindowIcon = Application.Current.MainWindow.Icon;
-                }
-            }
-            catch
-            {
-                WindowIcon = Application.Current.MainWindow.Icon;
-            }
+            dialogData = data;
 
             RequireResult = data.RequireResult;
             CancelAsync = data.CancelAsync;

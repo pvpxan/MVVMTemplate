@@ -16,13 +16,19 @@ namespace MVVMTemplate
         public string Value = "";
     }
 
+    public class INISection
+    {
+        public string Name = "";
+        public INIKeyValuePair[] Section = new INIKeyValuePair[0];
+    }
+
     public static class INI
     {
         private static ReaderWriterLockSlim iniLocker = new ReaderWriterLockSlim();
 
-        public static bool? ReadBool(string file, string key)
+        public static bool? ReadBool(string file, string section, string key)
         {
-            string value = Read(file, key);
+            string value = Read(file, section, key);
             bool parsed;
             if (bool.TryParse(value, out parsed) == false)
             {
@@ -32,9 +38,9 @@ namespace MVVMTemplate
             return parsed;
         }
 
-        public static int? ReadInt(string file, string key)
+        public static int? ReadInt(string file, string section, string key)
         {
-            string value = Read(file, key);
+            string value = Read(file, section, key);
             int parsed;
             if (int.TryParse(value, out parsed) == false)
             {
@@ -44,47 +50,57 @@ namespace MVVMTemplate
             return parsed;
         }
 
-        public static string Read(string file, string key)
+        public static string Read(string file, string section, string key)
         {
-            if (string.IsNullOrEmpty(file) || string.IsNullOrEmpty(key) || File.Exists(file) == false)
+            if (string.IsNullOrEmpty(file) || section == null || string.IsNullOrEmpty(key) || File.Exists(file) == false)
             {
                 return "";
             }
 
             iniLocker.EnterReadLock();
-            string value = safeReadKey(file, key);
+            string value = safeReadKey(file, section, key);
             iniLocker.ExitReadLock();
             return value;
         }
 
-        private static string safeReadKey(string file, string key)
+        private static string safeReadKey(string file, string section, string key)
         {
-            INIKeyValuePair[] iniFileKeyValueList = safeReadFile(file);
-
-            // Checks list for the key and returns the value if found.
-            string value = iniFileKeyValueList.FirstOrDefault(k => k.Key.ToLower() == key.ToLower()).Value;
-            if (string.IsNullOrEmpty(value))
+            List<INISection> iniSectionList = safeReadFile(file);
+            if (iniSectionList == null || iniSectionList.Count <= 0)
             {
                 return "";
             }
 
-            return value;
+            int sectionIndex = iniSectionList.FindIndex(s => s.Name.ToLower() == section.ToLower());
+            if (sectionIndex > -1)
+            {
+                // Checks list for a matching key. Returns empty string if not found.
+                INIKeyValuePair iniKeyValuePair = iniSectionList[sectionIndex].Section.FirstOrDefault(k => k.Key.ToLower() == key.ToLower());
+                if (iniKeyValuePair == null)
+                {
+                    return "";
+                }
+
+                return iniKeyValuePair.Value;
+            }
+
+            return "";
         }
 
-        public static INIKeyValuePair[] ReadFile(string file)
+        public static INISection[] ReadFile(string file)
         {
             if (string.IsNullOrEmpty(file) || File.Exists(file) == false)
             {
-                return new INIKeyValuePair[0];
+                return new INISection[0];
             }
 
             iniLocker.EnterReadLock();
-            INIKeyValuePair[] iniFileKeyValueList = safeReadFile(file);
+            INISection[] iniSectionArray = safeReadFile(file).ToArray();
             iniLocker.ExitReadLock();
-            return iniFileKeyValueList;
+            return iniSectionArray;
         }
 
-        private static INIKeyValuePair[] safeReadFile(string file)
+        private static List<INISection> safeReadFile(string file)
         {
             string[] iniFile = null;
             try
@@ -94,68 +110,98 @@ namespace MVVMTemplate
             catch (Exception Ex)
             {
                 LogWriter.Exception("Error reading INI file: " + file, Ex);
-                return new INIKeyValuePair[0];
+                return new List<INISection>();
             }
 
             if (iniFile == null || iniFile.Length <= 0)
             {
-                return new INIKeyValuePair[0];
+                return new List<INISection>();
             }
 
-            INIKeyValuePair[] iniFileKeyValueList = new INIKeyValuePair[iniFile.Length];
+            List<INISection> iniSectionList = new List<INISection>();
+            List<INIKeyValuePair> currentKeyValuePair = new List<INIKeyValuePair>();
+            int currentIndex = -1;
             for (int i = 0; i < iniFile.Length; i++)
             {
-                string line = iniFile[i].ToLower();
-                if (line.Contains("=") == false)
+                string line = iniFile[i].Trim().ToLower();
+
+                if (line.StartsWith("[") && line.EndsWith("]"))
                 {
+                    if (currentIndex > -1 && iniSectionList.Count > 0 && currentKeyValuePair.Count > 0)
+                    {
+                        iniSectionList[currentIndex].Section = currentKeyValuePair.ToArray();
+                        currentKeyValuePair.Clear();
+                    }
+
+                    iniSectionList.Add(new INISection() { Name = line.TrimStart('[').TrimEnd(']'), });
+                    currentIndex++;
                     continue;
                 }
 
-                string[] parts = line.Split('=');
-                if (parts.Length > 2)
+                if (line.Contains("="))
                 {
-                    continue;
+                    string[] parts = line.Split('=');
+                    if (parts.Length > 2)
+                    {
+                        continue;
+                    }
+
+                    if (iniSectionList.Count <= 0)
+                    {
+                        currentIndex++;
+                        iniSectionList.Add(new INISection() { Name = "", });
+                    }
+
+                    currentKeyValuePair.Add(new INIKeyValuePair() { Key = parts[0], Value = parts[1] });
                 }
 
-                iniFileKeyValueList[i].Key = parts[0];
-                iniFileKeyValueList[i].Value = parts[1];
+                // This tells us we have reached the end of the file and the last set of Key Value pairs should be written to the appropriate section.
+                if (i == iniFile.Length - 1)
+                {
+                    iniSectionList[currentIndex].Section = currentKeyValuePair.ToArray();
+                    currentKeyValuePair.Clear();
+                }
             }
 
-            return iniFileKeyValueList;
+            return iniSectionList;
         }
 
-        public static bool Write(string file, string key, string value, bool create, bool backup)
+        public static bool Write(string file, string section, string key, string value, bool create, bool backup)
         {
             if (string.IsNullOrEmpty(file) || string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
             {
                 return false;
             }
 
-            INIKeyValuePair[] iniKeyValueSettings = new INIKeyValuePair[]
+            INISection[] iniSectionList = new INISection[]
             {
-                new INIKeyValuePair(){ Key = key, Value = value},
+                new INISection()
+                {
+                    Name = section,
+                    Section =  new INIKeyValuePair[] { new INIKeyValuePair(){ Key = key, Value = value}, },
+                },
             };
 
             iniLocker.EnterWriteLock();
-            bool success = safeWrite(file, iniKeyValueSettings, create, backup);
+            bool success = safeWrite(file, iniSectionList, create, backup);
             iniLocker.ExitWriteLock();
             return success;
         }
 
-        public static bool MultiWrite(string file, INIKeyValuePair[] iniKeyValueSettings, bool create, bool backup)
+        public static bool MultiWrite(string file, INISection[] iniSectionList, bool create, bool backup)
         {
-            if (string.IsNullOrEmpty(file) || iniKeyValueSettings == null || iniKeyValueSettings.Length <= 0)
+            if (string.IsNullOrEmpty(file) || iniSectionList == null || iniSectionList.Length <= 0)
             {
                 return false;
             }
 
             iniLocker.EnterWriteLock();
-            bool success = safeWrite(file, iniKeyValueSettings, create, backup);
+            bool success = safeWrite(file, iniSectionList, create, backup);
             iniLocker.ExitWriteLock();
             return success;
         }
 
-        private static bool safeWrite(string file, INIKeyValuePair[] iniKeyValueSettings, bool create, bool backup)
+        private static bool safeWrite(string file, INISection[] iniSectionList, bool create, bool backup)
         {
             if (File.Exists(file) == false && create == false)
             {
@@ -165,7 +211,7 @@ namespace MVVMTemplate
 
             if (File.Exists(file) == false && create)
             {
-                if (writeAllLines(file, getAllText(iniKeyValueSettings), backup))
+                if (writeAllLines(file, convertSectionList(iniSectionList), backup))
                 {
                     return true;
                 }
@@ -173,22 +219,11 @@ namespace MVVMTemplate
                 return false;
             }
 
-            // File should already exists at this point.
-            string[] iniFile = null;
-            try
+            // Converts the INISection[] to a List<INISection>.
+            List<INISection> fileINISectionList = safeReadFile(file).ToList();
+            if (fileINISectionList.Count <= 0) // If the file is empty, just write directly to it.
             {
-                iniFile = File.ReadAllLines(file); // Read the file to a List<string>
-            }
-            catch (Exception Ex)
-            {
-                LogWriter.Exception("Error reading INI file: " + file, Ex);
-                return false;
-            }
-
-            // If the file is empty, just write directly to it.
-            if (iniFile == null || iniFile.Length <= 0)
-            {
-                if (writeAllLines(file, getAllText(iniKeyValueSettings), backup))
+                if (writeAllLines(file, convertSectionList(iniSectionList), backup))
                 {
                     return true;
                 }
@@ -196,41 +231,21 @@ namespace MVVMTemplate
                 return false;
             }
 
-            // Converts the lines to a List<INIKeyValuePair>.
-            // This will check each line to make sure it is in the proper format for an INI file.
-            List<INIKeyValuePair> iniFileKeyValueList = new List<INIKeyValuePair>();
-            for (int i = 0; i < iniFile.Length; i++)
+            foreach (INISection iniSection in iniSectionList)
             {
-                string line = iniFile[i].ToLower();
-                if (line.Contains("=") == false)
+                int matchedFileINISectionIndex = fileINISectionList.FindIndex(s => s.Name.ToLower() == iniSection.Name.ToLower());
+                if (matchedFileINISectionIndex > -1) // Matching section found.
                 {
-                    continue;
-                }
-
-                string[] parts = line.Split('=');
-                if (parts.Length > 2)
-                {
-                    continue;
-                }
-
-                iniFileKeyValueList.Add(new INIKeyValuePair() { Key = parts[0], Value = parts[1] });
-            }
-
-            // Checks the parameters to see if there are any new Key/Value pairs that need to be added or updated.
-            foreach (INIKeyValuePair iniKeyValue in iniKeyValueSettings)
-            {
-                int index = iniFileKeyValueList.FindIndex(k => k.Key.ToLower() == iniKeyValue.Key.ToLower());
-                if (index > -1)
-                {
-                    iniFileKeyValueList[index].Value = iniKeyValue.Value;
+                    fileINISectionList[matchedFileINISectionIndex].Section = mergeINIKeyValuePairList(iniSection.Section, fileINISectionList[matchedFileINISectionIndex].Section);
                 }
                 else
                 {
-                    iniFileKeyValueList.Add(new INIKeyValuePair() { Key = iniKeyValue.Key, Value = iniKeyValue.Value });
+                    // Section does not exist so we can add this one.
+                    fileINISectionList.Add(iniSection);
                 }
             }
 
-            if (writeAllLines(file, getAllText(iniFileKeyValueList.ToArray()), backup))
+            if (writeAllLines(file, convertSectionList(fileINISectionList.ToArray()), backup))
             {
                 return true;
             }
@@ -238,25 +253,84 @@ namespace MVVMTemplate
             return false;
         }
 
-        private static string getAllText(INIKeyValuePair[] iniKeyValueList)
+        private static string convertSectionList(INISection[] iniSectionList)
         {
             string allText = "";
-            foreach (INIKeyValuePair iniKeyValuePair in iniKeyValueList)
+
+            INISection blankSection = new INISection();
+
+            foreach (INISection iniSection in iniSectionList)
             {
-                if (string.IsNullOrEmpty(iniKeyValuePair.Key))
+                // If we have multiple blank sections, we want to merge those. These will be added back in the end if any exist.
+                if (iniSection.Name.Length <= 0)
                 {
+                    blankSection.Section = mergeINIKeyValuePairList(blankSection.Section, iniSection.Section);
                     continue;
                 }
 
-                if (iniKeyValuePair.Value == null)
+                allText = "[" + iniSection.Name + "]" + Environment.NewLine;
+                foreach (INIKeyValuePair iniKeyValuePair in iniSection.Section)
                 {
-                    iniKeyValuePair.Value = "";
+                    if (string.IsNullOrEmpty(iniKeyValuePair.Key))
+                    {
+                        continue;
+                    }
+
+                    if (iniKeyValuePair.Value == null)
+                    {
+                        iniKeyValuePair.Value = "";
+                    }
+
+                    allText = allText + iniKeyValuePair.Key + "=" + iniKeyValuePair.Value + Environment.NewLine;
                 }
 
-                allText = allText + iniKeyValuePair.Key + "=" + iniKeyValuePair.Value + Environment.NewLine;
+                allText = allText + Environment.NewLine;
+            }
+
+            if (blankSection.Section.Length > 0)
+            {
+                string blankSectionText = "";
+                foreach (INIKeyValuePair iniKeyValuePair in blankSection.Section)
+                {
+                    if (string.IsNullOrEmpty(iniKeyValuePair.Key))
+                    {
+                        continue;
+                    }
+
+                    if (iniKeyValuePair.Value == null)
+                    {
+                        iniKeyValuePair.Value = "";
+                    }
+
+                    blankSectionText = blankSectionText + iniKeyValuePair.Key + "=" + iniKeyValuePair.Value + Environment.NewLine;
+                }
+
+                allText = blankSectionText + Environment.NewLine + allText;
             }
 
             return allText;
+        }
+
+        // Merges 2 INIKeyValuePair[] with value priority with the primary list.
+        private static INIKeyValuePair[] mergeINIKeyValuePairList(INIKeyValuePair[] primary, INIKeyValuePair[] secondary)
+        {
+            // The secondary list is what gets overwritten so we are assinging it to a list if we need to append the number of items.
+            List<INIKeyValuePair> workingList = secondary.ToList();
+            foreach (INIKeyValuePair iniKeyValuePair in primary)
+            {
+                // Checks if the secondary list contains the key pair.
+                int matchedIndex = workingList.FindIndex(p => p.Key.ToLower() == iniKeyValuePair.Key.ToLower());
+                if (matchedIndex > -1)
+                {
+                    workingList[matchedIndex].Value = iniKeyValuePair.Value;
+                }
+                else
+                {
+                    workingList.Add(new INIKeyValuePair() { Key = iniKeyValuePair.Key, Value = iniKeyValuePair.Value });
+                }
+            }
+
+            return workingList.ToArray();
         }
 
         private static bool writeAllLines(string file, string allText, bool backup)

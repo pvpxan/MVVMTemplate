@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MVVMTemplate"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}" Height="140" Width="400"
-        ResizeMode="NoResize" TabIndex="50"
-        Icon="{Binding WindowIcon}"
+        Height="140" Width="400"
+        ResizeMode="NoResize" SizeToContent="WidthAndHeight"
         BorderThickness="1" BorderBrush="#FF007ACC" Background="Black"
-        WindowStyle="{Binding DialogWindowStyle}" Topmost="{Binding Topmost}"
-        SizeToContent="WidthAndHeight"
-        WindowStartupLocation="CenterOwner">
+        TabIndex="0"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow"
+        Topmost="True"
+        Title="">
 
     <Window.Resources>
         <DataTemplate DataType="{x:Type local:WindowsMessageViewModel}">
