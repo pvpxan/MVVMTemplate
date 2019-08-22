@@ -8,7 +8,7 @@ using System.Windows;
 namespace MVVMTemplate
 {
     // START LogWriterWPF_Class ---------------------------------------------------------------------------------------------------------
-    public static class LogWriterWPF
+    public static class LogWriterExtended
     {
         // This class allows for displaying of messages before they are logged with LogWriterConsole
 

@@ -63,7 +63,7 @@
     <Compile Include="Classes\ConfigManager.cs" />
     <Compile Include="Classes\INI.cs" />
     <Compile Include="Classes\LogWriterConsole.cs" />
-    <Compile Include="Classes\LogWriterWPF.cs" />
+    <Compile Include="Classes\LogWriterExtended.cs" />
     <Compile Include="Classes\Utility.cs" />
     <Compile Include="Controls\CustomDialog.xaml.cs">
       <DependentUpon>CustomDialog.xaml</DependentUpon>
@@ -106,7 +106,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Templates\DataTemplates.xaml">
+    <Page Include="Templates\MergedResources.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

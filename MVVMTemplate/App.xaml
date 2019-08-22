@@ -7,7 +7,7 @@
 
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Templates/DataTemplates.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Templates/MergedResources.xaml" />
 
                 <!-- START User defined custom dialog DataTypes -->
                 <ResourceDictionary>
