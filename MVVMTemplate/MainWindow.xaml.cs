@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StreamlineMVVM;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -84,17 +85,13 @@ namespace MVVMTemplate
         // NOTE: See the DialogData class above for more options. The method used below and even direct calling to open a dialog requires a window where the dialog will open.
         public static void ExampleOne(object parameter)
         {
-            DialogData data = new DialogData()
-            {
-                WindowTitle = "Example...",
-                ContentHeader = "This is a sample message...",
-                ContentBody = "The is the body of the dialog.",
-                DialogWindowStyle = WindowStyle.SingleBorderWindow,
-                WindowIconURI = "pack://application:,,,/Resources/gear_icon2.ico",
-                MessageButtons = WindowMessageButtons.Ok,
-            };
-
-            Statics.OpenWindowsDialog(data, parameter as Window);
+            MessageBoxEnhanced.Show(
+                parameter as Window,
+                "Example...",
+                "This is a sample message...",
+                "The is the body of the dialog.",
+                WindowMessageButtons.Ok,
+                WindowMessageIcon.Information);
         }
 
         // Custom dialog:

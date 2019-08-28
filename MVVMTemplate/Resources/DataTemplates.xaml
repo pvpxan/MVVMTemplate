@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:MVVMTemplate">
+
+    <ResourceDictionary.MergedDictionaries>
+
+        <!-- START User defined custom dialog DataTypes -->
+        <ResourceDictionary>
+            <DataTemplate DataType="{x:Type local:CustomDialogViewModel}">
+                <local:CustomDialog></local:CustomDialog>
+            </DataTemplate>
+        </ResourceDictionary>
+        <!-- END User defined custom dialog DataTypes -->
+
+        <ResourceDictionary Source="pack://application:,,,/StreamlineMVVM;component/Templates/MergedResources.xaml" />
+
+    </ResourceDictionary.MergedDictionaries>
+    
+</ResourceDictionary>

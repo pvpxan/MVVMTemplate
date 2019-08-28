@@ -15,14 +15,14 @@
     <Grid>
         <!-- See App.xaml for button template -->
         <Button x:Name="open_dialog" Margin="0,140,0,0" Height="40" Width="140"
-                Style="{StaticResource Custom_Button_Style}"
+                Style="{StaticResource ButtonExtendedStyle}"
                 BorderBrush="White"
                 Background="CadetBlue"
                 Foreground="White"
                 HorizontalAlignment="Center" VerticalAlignment="Top"
                 TabIndex="0"
                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                Command="{Binding Open_Dialog}">
+                Command="{Binding OpenDialog}">
             <Label VerticalAlignment="Center" HorizontalAlignment="Center"
                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                        Height="26" Margin="0,-4,0,0" Padding="0" Content="Open Dialog" Foreground="White"/>

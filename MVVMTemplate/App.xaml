@@ -7,16 +7,13 @@
 
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/Templates/MergedResources.xaml" />
 
-                <!-- START User defined custom dialog DataTypes -->
+                <!-- Delete this line if using embedded resources. -->
+                <ResourceDictionary Source="pack://application:,,,/MVVMTemplate;component/Resources/DataTemplates.xaml" />
+                
                 <ResourceDictionary>
-                    <DataTemplate DataType="{x:Type local:CustomDialogViewModel}">
-                        <local:CustomDialog></local:CustomDialog>
-                    </DataTemplate>
-                </ResourceDictionary>
-                <!-- END User defined custom dialog DataTypes -->
 
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 

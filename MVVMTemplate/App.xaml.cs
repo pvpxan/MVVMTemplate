@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StreamlineMVVM;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -17,86 +18,154 @@ namespace MVVMTemplate
     {
         public void AppStartup(object sender, StartupEventArgs e)
         {
-            // LoadAssemblies(); // Load embedded resources.
+            // Use these if you are loading embedded resources.
+            // DLLEmbeddingHandler.LoadAssemblies(); 
+            // DLLEmbeddingHandler.LoadResourceDictionary(this, "StreamlineMVVM", "Templates/MergedResources.xaml"); // Loads the library MergedResources of StreamlineMVVM.
+            // DLLEmbeddingHandler.LoadResourceDictionary(this, "MVVMTemplate", "Resources/DataTemplates.xaml"); // Loads application DataTemplates AFTER libraries loaded so things work.
+
             Statics.Initialization();
 
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
         }
+    }
 
+    // START DLLEmbeddingHandler_Class --------------------------------------------------------------------------------------------------
+    public static class DLLEmbeddingHandler
+    {
         // NECESSARY for loading embedded resources.
         // ----------------------------------------------------------------------------------------------
         public static void LoadAssemblies()
         {
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
-                string dllName = new AssemblyName(args.Name).Name + ".dll";
-                var assembly = Assembly.GetExecutingAssembly();
-
-                string resourceName = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn.EndsWith(dllName));
-                if (resourceName == null)
-                {
-                    return null; // Not found, maybe another handler will find it
-                }
-
-                System.IO.Stream stream = null;
-                Assembly loadedAssembly = null;
-                try
-                {
-                    stream = assembly.GetManifestResourceStream(resourceName);
-                    byte[] assemblyData = new byte[stream.Length];
-                    stream.Read(assemblyData, 0, assemblyData.Length);
-                    loadedAssembly = Assembly.Load(assemblyData);
-                }
-                catch (Exception Ex)
-                {
-                    loadedAssembly = null;
-                    MessageBox.Show("Error loading embedded assembly resource. Application will now close." + Environment.NewLine + Convert.ToString(Ex));
-                    Application.Current.Shutdown();
-                }
-                finally
-                {
-                    if (stream != null)
-                    {
-                        stream.Dispose();
-                    }
-                }
-
-                return loadedAssembly;
+                return resolve(sender, args);
             };
         }
+
+        private static Assembly resolve(object sender, ResolveEventArgs args)
+        {
+            string dllName = new AssemblyName(args.Name).Name + ".dll";
+            var assembly = Assembly.GetExecutingAssembly();
+
+            string resourceName = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn.EndsWith(dllName));
+            if (resourceName == null)
+            {
+                return null; // Not found, maybe another handler will find it
+            }
+
+            System.IO.Stream stream = null;
+            Assembly loadedAssembly = null;
+            try
+            {
+                stream = assembly.GetManifestResourceStream(resourceName);
+                byte[] assemblyData = new byte[stream.Length];
+                stream.Read(assemblyData, 0, assemblyData.Length);
+                loadedAssembly = Assembly.Load(assemblyData);
+            }
+            catch (Exception Ex)
+            {
+                loadedAssembly = null;
+
+                MessageBox.Show("Error loading embedded assembly resource. Application will now close." + Environment.NewLine + Convert.ToString(Ex));
+                Shutdown("DLL", Ex);
+            }
+            finally
+            {
+                if (stream != null)
+                {
+                    stream.Dispose();
+                }
+            }
+
+            return loadedAssembly;
+        }
+
+        // This is for WPF applications only that reference XAML files built into an assembly.
+        public static void LoadResourceDictionary(string assembly, string path)
+        {
+            // Uri path of assembly resource.
+            string uri = @"pack://application:,,,/" + assembly + ";component/" + path;
+
+            // Add Uri to App ResourceDictionary.
+            try
+            {
+                Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary() { Source = new Uri(uri) });
+            }
+            catch (Exception Ex)
+            {
+                MessageBox.Show("Error loading embedded XAML resource. Application will now close." + Environment.NewLine + Convert.ToString(Ex));
+                Shutdown("XAML", Ex);
+            }
+        }
+
+        public static void Shutdown(string resource, Exception Ex)
+        {
+            string message = "Error loading embedded " + resource + " resource. Application will now close." + Environment.NewLine + Convert.ToString(Ex);
+
+            MessageBox.Show(message);
+            if (Application.Current != null)
+            {
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                Environment.Exit(0);
+            }
+        }
     }
+    // END DLLEmbeddingHandler_Class ----------------------------------------------------------------------------------------------------
 
     // START Statics_Class --------------------------------------------------------------------------------------------------------------
     public static class Statics
     {
-        public static Version CurrentFileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+        public static Version CurrentFileVersion { get; } = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+        public static string CurrentUser { get; } = Environment.UserName.ToLower();
+        public static string[] Args { get; } = Environment.GetCommandLineArgs();
+        public static string ProgramPath { get; } = getProgramPath();
+
         public static Window MainWindow = null;
-        public static readonly string[] Args = Environment.GetCommandLineArgs();
-        public static readonly string CurrentUser = Environment.UserName.ToLower();
-        public static string ProgramPath = "";
         public static string INIFilePath = "";
 
         // Method to load start up global vars.
         public static void Initialization()
         {
+            LogWriter.SetPath(ProgramPath, CurrentUser, System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+        }
+
+        private static string getProgramPath()
+        {
             try
             {
                 if (System.AppDomain.CurrentDomain.BaseDirectory[System.AppDomain.CurrentDomain.BaseDirectory.Length - 1] == '\\')
                 {
-                    ProgramPath = System.AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
+                    return System.AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
                 }
                 else
                 {
-                    ProgramPath = Environment.CurrentDirectory;
+                    return Environment.CurrentDirectory;
                 }
             }
             catch
             {
                 // TODO: Add some sort of default logging.
+                return "";
             }
+        }
 
-            LogWriter.SetPath(ProgramPath, CurrentUser, System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+        public static void Shutdown()
+        {
+            if (Application.Current == null)
+            {
+                Environment.Exit(0);
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    Application.Current.Shutdown();
+                });
+            }
         }
 
         // Opens Custom Windows style Dialog Window and setting the owner of that window to the passed in paramater. Optinal use since a dialog can be directly opened.
@@ -104,8 +173,13 @@ namespace MVVMTemplate
         {
             WindowMessageResult result = WindowMessageResult.Undefined;
 
+            if (Application.Current == null)
+            {
+                return result;
+            }
+
             // This will allow for use of this method from threads outside the UI thread.
-            App.Current.Dispatcher.Invoke((Action)delegate
+            Application.Current.Dispatcher.Invoke((Action)delegate
             {
                 DialogBaseWindowViewModel viewmodel = new WindowsMessageViewModel(data);
                 result = DialogService.OpenDialog(viewmodel, window);
