@@ -131,7 +131,7 @@
     <Folder Include="Dialogs\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\StreamlineMVVM.dll" />
+    <Content Include="Resources\StreamlineMVVM.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
