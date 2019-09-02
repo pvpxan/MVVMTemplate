@@ -41,6 +41,7 @@
     <Reference Include="StreamlineMVVM, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\StreamlineMVVM.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -131,7 +132,7 @@
     <Folder Include="Dialogs\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\StreamlineMVVM.dll" />
+    <EmbeddedResource Include="Resources\StreamlineMVVM.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
