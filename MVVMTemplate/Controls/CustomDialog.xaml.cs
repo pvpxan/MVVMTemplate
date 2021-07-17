@@ -24,12 +24,13 @@ namespace MVVMTemplate
     {
         private Window window = null;
 
-        public CustomDialog()
+        public CustomDialog(DialogData dialogData)
         {
             MainWindow mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
 
             try
             {
+                this.DataContext = new CustomDialogViewModel(dialogData);
                 InitializeComponent();
 
                 Loaded += contentLoaded;
@@ -46,7 +47,7 @@ namespace MVVMTemplate
             window = Window.GetWindow(this);
 
             // Subscribes to the Rendered Event of the DialogBaseWindow that sets this control as its datacontext.
-            window.ContentRendered += Content_Rendered;
+            window.ContentRendered += contentRendered;
 
             // Get the viewmodel from the DataContext
             CustomDialogViewModel viewmodel = DataContext as CustomDialogViewModel;
@@ -58,7 +59,7 @@ namespace MVVMTemplate
             }
         }
 
-        private void Content_Rendered(object sender, EventArgs e)
+        private void contentRendered(object sender, EventArgs e)
         {
             // Get the viewmodel from the DataContext
             CustomDialogViewModel viewmodel = DataContext as CustomDialogViewModel;
@@ -71,7 +72,7 @@ namespace MVVMTemplate
         }
     }
 
-    public class CustomDialogViewModel : DialogBaseWindowViewModel
+    public class CustomDialogViewModel : DialogViewModel
     {
         // ViewModel Only Vars
         // ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,12 +84,12 @@ namespace MVVMTemplate
         public CustomDialogViewModel(DialogData data) : base(data)
         {
             DataMessaging dataMessaging = new DataMessaging();
-            dataMessaging.OnDataTransmittedEvent += OnDialogDataReceived;
+            dataMessaging.OnDataTransmittedEvent += onDialogDataReceived;
             Loaded = new RelayCommand(Loaded_Command);
             Rendered = new RelayCommand(Rendered_Command);
         }
 
-        private void OnDialogDataReceived(DialogData data)
+        private void onDialogDataReceived(DialogData data)
         {
             
         }

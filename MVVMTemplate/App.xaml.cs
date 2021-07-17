@@ -19,9 +19,9 @@ namespace MVVMTemplate
         public void AppStartup(object sender, StartupEventArgs e)
         {
             // Use these if you are loading embedded resources.
-            // DLLEmbeddingHandler.LoadAssemblies(); 
-            // DLLEmbeddingHandler.LoadResourceDictionary(this, "StreamlineMVVM", "Templates/MergedResources.xaml"); // Loads the library MergedResources of StreamlineMVVM.
-            // DLLEmbeddingHandler.LoadResourceDictionary(this, "MVVMTemplate", "Resources/DataTemplates.xaml"); // Loads application DataTemplates AFTER libraries loaded so things work.
+            DLLEmbeddingHandler.LoadAssemblies(); 
+            DLLEmbeddingHandler.LoadResourceDictionary("StreamlineMVVM", "Templates/MergedResources.xaml"); // Loads the library MergedResources of StreamlineMVVM.
+            DLLEmbeddingHandler.LoadResourceDictionary("MVVMTemplate", "Resources/DataTemplates.xaml"); // Loads application DataTemplates AFTER libraries loaded so things work.
 
             Statics.Initialization();
 
@@ -66,8 +66,6 @@ namespace MVVMTemplate
             catch (Exception Ex)
             {
                 loadedAssembly = null;
-
-                MessageBox.Show("Error loading embedded assembly resource. Application will now close." + Environment.NewLine + Convert.ToString(Ex));
                 Shutdown("DLL", Ex);
             }
             finally
@@ -130,16 +128,16 @@ namespace MVVMTemplate
         // Method to load start up global vars.
         public static void Initialization()
         {
-            LogWriter.SetPath(ProgramPath, CurrentUser, System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+            LogWriter.SetPath(ProgramPath, CurrentUser, Assembly.GetExecutingAssembly().GetName().Name);
         }
 
         private static string getProgramPath()
         {
             try
             {
-                if (System.AppDomain.CurrentDomain.BaseDirectory[System.AppDomain.CurrentDomain.BaseDirectory.Length - 1] == '\\')
+                if (AppDomain.CurrentDomain.BaseDirectory[AppDomain.CurrentDomain.BaseDirectory.Length - 1] == '\\')
                 {
-                    return System.AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
+                    return AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
                 }
                 else
                 {
@@ -179,10 +177,9 @@ namespace MVVMTemplate
             }
 
             // This will allow for use of this method from threads outside the UI thread.
-            Application.Current.Dispatcher.Invoke((Action)delegate
+            window.Dispatcher.Invoke((Action)delegate
             {
-                DialogBaseWindowViewModel viewmodel = new WindowsMessageViewModel(data);
-                result = DialogService.OpenDialog(viewmodel, window);
+                result = MessageBoxEnhanced.OpenWindowMessage(data, window);
             });
 
             return result;

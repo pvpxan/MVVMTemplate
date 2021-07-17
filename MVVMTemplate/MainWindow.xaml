@@ -4,18 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MVVMTemplate"
+        xmlns:ext="clr-namespace:StreamlineMVVM;assembly=StreamlineMVVM"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="750" Background="Black" ResizeMode="CanMinimize"
         Icon="pack://application:,,,/Resources/gear_icon1.ico">
 
-    <Window.DataContext>
-        <local:MainWindowViewModel/>
-    </Window.DataContext>
-
     <Grid>
         <!-- See App.xaml for button template -->
         <Button x:Name="open_dialog" Margin="0,140,0,0" Height="40" Width="140"
-                Style="{StaticResource ButtonExtendedStyle}"
+                Style="{StaticResource ButtonExtended}"
                 BorderBrush="White"
                 Background="CadetBlue"
                 Foreground="White"

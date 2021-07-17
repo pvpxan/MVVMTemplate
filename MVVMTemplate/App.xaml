@@ -7,10 +7,6 @@
 
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-
-                <!-- Delete this line if using embedded resources. -->
-                <ResourceDictionary Source="pack://application:,,,/MVVMTemplate;component/Resources/DataTemplates.xaml" />
-                
                 <ResourceDictionary>
 
                 </ResourceDictionary>
