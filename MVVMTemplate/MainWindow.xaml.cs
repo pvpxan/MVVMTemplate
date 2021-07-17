@@ -25,6 +25,7 @@ namespace MVVMTemplate
         {
             try
             {
+                this.DataContext = new MainWindowViewModel();
                 InitializeComponent();
 
                 Statics.MainWindow = this;
@@ -105,8 +106,10 @@ namespace MVVMTemplate
                 Topmost = true,
             };
 
-            DialogBaseWindowViewModel viewmodel = new CustomDialogViewModel(data);
-            WindowMessageResult result = DialogService.OpenDialog(viewmodel, parameter as Window);
+            CustomDialogViewModel customDialogViewModel = new CustomDialogViewModel(data);
+            DialogUserControlView dialogUserControlView = new DialogUserControlView(customDialogViewModel, new CustomDialog(data));
+
+            WindowMessageResult result = DialogService.OpenDialog(dialogUserControlView, parameter as Window);
         }
         // ---------------------------------------------------------------------------------------------------------------------------------------------
     }
